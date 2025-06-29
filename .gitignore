@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+subject.md
 *.o
 *.d
 *.a
