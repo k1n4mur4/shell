@@ -51,23 +51,40 @@ make test     # minishellをテスト実行（エラー出力を抑制）
    - ft_dprintfでSTDERR_FILENOにエラー出力
    - 終了値は127（コマンドが見つからない）等の標準値を使用
 
-## 実装進捗と構造
+## コアアーキテクチャ詳細
 
-### 現在実装済み
-- 基本的なREPLループ（`reader_loop()`）
-- readlineによる入力受付とプロンプト表示
-- コマンド履歴機能
-- 環境変数管理システム
-- 終了値管理システム
-- "exit"コマンドの基本実装
+### 主要データフロー
+```
+main() → shell() → reader_loop() → [parser() → execute_command()]
+                ↓
+         initialize_environment() → env(SET)
+```
 
-### 実装予定（subject.mdの要件）
-- シグナルハンドリング（Ctrl+C、Ctrl+D、Ctrl+\）
-- レクサー・パーサー
-- コマンド実行（PATH考慮）
-- パイプ（`|`）、リダイレクト（`<`、`>`、`<<`、`>>`）
-- 環境変数展開（`$VAR`、`$?`）
-- ビルトインコマンド（echo、cd、pwd、export、unset、env、exit）
+### 重要な実装状況
+**完全実装済み**:
+- `env.c`: 環境変数管理（リンクリスト、シングルトンパターン）
+- `exit_value.c`: 終了ステータス管理
+- `eval.c`: REPLループとreadline統合
+- `dispose_cmd.c`: コマンド構造体のメモリ解放
+
+**スタブ状態（要実装）**:
+- `parser/parser.c`: 構文解析（現在空関数）
+- `execute/execute_cmd.c`: コマンド実行（現在空関数）
+
+### データ構造の継承関係
+```c
+// command.h - 基本構造（現状シンプル）
+typedef struct s_command {
+    char *current_command;  // readline()からの入力文字列
+} t_command;
+
+// env.h - 完全実装済み
+typedef struct s_env {
+    char *key;
+    char *value; 
+    struct s_env *next;
+} t_env;
+```
 
 ## 開発ガイドライン
 
@@ -76,9 +93,10 @@ make test     # minishellをテスト実行（エラー出力を抑制）
 - 新機能はfeature/ブランチとして作成  
 - mainブランチへの直接PRは禁止
 
-### 計画管理
-- 実装計画は`plan.md`に記載
-- 詳細な計画は`phase1_plan.md`等のフェーズ別ファイルに分割
+### 設計ドキュメント連携
+- `detailed_design.md`: 詳細なシステム設計仕様
+- `function_specifications.md`: 関数レベルの仕様書
+- `plan.md`: 実装計画（常に最新状態に更新）
 
 ### メモリリーク対策
 - readlineライブラリ自体のメモリリークは許容
@@ -86,10 +104,15 @@ make test     # minishellをテスト実行（エラー出力を抑制）
 - valgrindで定期的に検査
 
 ## 開発時の注意点
-- Norm規約の厳守
-- 使用可能な外部関数のみ使用（subject.mdに記載）
-- シグナル処理でのグローバル変数は1つまで制限
-- 全てのヒープメモリの適切な解放
+- **42 Norm規約の厳守**: 関数は25行以内、1行80文字以内等
+- **使用可能関数制限**: subject.mdに記載の関数のみ使用可能
+- **シグナル処理制約**: グローバル変数は1つまで（`volatile sig_atomic_t`のみ）
+- **メモリ管理**: libftのft_calloc/freeを使用、readlineの戻り値は必ずfree
+
+## 重要な実装制約
+- `t_command.current_command`は現在文字列のみ（将来的に構造化予定）
+- 既存の`env()`シングルトンパターンを壊さないこと
+- `exit_value()`システムとの整合性を保つこと
 
 ## 追加指示
 - 日本語で返答してください
