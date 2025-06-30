@@ -1,4 +1,0 @@
-Hello
-Test
-Makefile
-Added line

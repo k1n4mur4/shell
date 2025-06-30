@@ -1,5 +1,0 @@
-Hello
-World
-Test
-Makefile
-README
