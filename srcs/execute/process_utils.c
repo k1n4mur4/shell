@@ -1,5 +1,6 @@
 #include "process_utils.h"
 #include "env.h"
+#include "signal_handler.h"
 
 /* Count number of elements in word list */
 int	count_word_list(t_word_list *list)
@@ -216,7 +217,9 @@ int	execute_external_command(const char *command_path, t_word_list *args)
 	}
 	else if (pid == 0)
 	{
-		/* Child process */
+		/* Child process - reset signals to default behavior */
+		setup_child_signals();
+		
 		if (execve(command_path, argv, envp) == -1)
 		{
 			ft_dprintf(STDERR_FILENO, "minishell: %s: %s\n", command_path, strerror(errno));
@@ -227,8 +230,13 @@ int	execute_external_command(const char *command_path, t_word_list *args)
 	}
 	else
 	{
-		/* Parent process */
+		/* Parent process - ignore signals while child is running */
+		setup_parent_signals();
 		exit_code = wait_for_child_process(pid);
+		
+		/* Restore original signal handlers after child completes */
+		set_signal();
+		
 		free_argv_array(argv);
 		free_envp_array(envp);
 		return (exit_code);

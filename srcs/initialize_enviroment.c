@@ -58,7 +58,7 @@ void	initialize_enviroment(char **envp)
 
 	if (!envp || !*envp)
 	{
-		ft_dprintf(STDERR_FILENO, "Warning: No environment variables found\n");
+		/* Debug: ft_dprintf(STDERR_FILENO, "Warning: No environment variables found\n"); */
 		return;
 	}
 	count = 0;
@@ -71,5 +71,5 @@ void	initialize_enviroment(char **envp)
 		envp++;
 		count++;
 	}
-	ft_dprintf(STDERR_FILENO, "Initialized %d environment variables\n", count);
+	/* Debug: ft_dprintf(STDERR_FILENO, "Initialized %d environment variables\n", count); */
 }

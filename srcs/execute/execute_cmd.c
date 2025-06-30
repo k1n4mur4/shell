@@ -3,6 +3,10 @@
 #include "path_utils.h"
 #include "redirect_utils.h"
 #include "process_utils.h"
+#include "signal_handler.h"
+#include <signal.h>
+#include <string.h>
+#include <errno.h>
 
 /* Forward declarations */
 static int	execute_simple_command(t_simple_command *simple);
@@ -84,12 +88,98 @@ static int	execute_simple_command(t_simple_command *simple)
 	return (exit_code);
 }
 
-/* Execute pipeline (placeholder) */
+/* Execute pipeline */
 static int	execute_pipeline(t_command *left, t_command *right)
 {
-	(void)left;
-	(void)right;
-	ft_dprintf(STDERR_FILENO, "Pipeline execution not yet implemented\n");
+	int		pipe_fd[2];
+	pid_t	left_pid;
+	pid_t	right_pid;
+	int		left_status;
+	int		right_status;
+
+	if (!left || !right)
+		return (1);
+
+	/* Create pipe */
+	if (pipe(pipe_fd) == -1)
+	{
+		ft_dprintf(STDERR_FILENO, "minishell: pipe failed: %s\n", strerror(errno));
+		return (1);
+	}
+
+	/* Execute left command */
+	left_pid = fork();
+	if (left_pid == -1)
+	{
+		ft_dprintf(STDERR_FILENO, "minishell: fork failed: %s\n", strerror(errno));
+		close(pipe_fd[0]);
+		close(pipe_fd[1]);
+		return (1);
+	}
+	else if (left_pid == 0)
+	{
+		/* Child process for left command - reset signals to default */
+		setup_child_signals();
+		
+		close(pipe_fd[0]);					/* Close read end */
+		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+		{
+			ft_dprintf(STDERR_FILENO, "minishell: dup2 failed: %s\n", strerror(errno));
+			close(pipe_fd[1]);
+			exit(1);
+		}
+		close(pipe_fd[1]);					/* Close write end after dup2 */
+		execute_command(left);				/* Execute left command */
+		exit(exit_value(0, GET));
+	}
+
+	/* Execute right command */
+	right_pid = fork();
+	if (right_pid == -1)
+	{
+		ft_dprintf(STDERR_FILENO, "minishell: fork failed: %s\n", strerror(errno));
+		close(pipe_fd[0]);
+		close(pipe_fd[1]);
+		kill(left_pid, SIGTERM);			/* Terminate left child */
+		waitpid(left_pid, NULL, 0);
+		return (1);
+	}
+	else if (right_pid == 0)
+	{
+		/* Child process for right command - reset signals to default */
+		setup_child_signals();
+		
+		close(pipe_fd[1]);					/* Close write end */
+		if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+		{
+			ft_dprintf(STDERR_FILENO, "minishell: dup2 failed: %s\n", strerror(errno));
+			close(pipe_fd[0]);
+			exit(1);
+		}
+		close(pipe_fd[0]);					/* Close read end after dup2 */
+		execute_command(right);				/* Execute right command */
+		exit(exit_value(0, GET));
+	}
+
+	/* Parent process: close pipe and wait for children */
+	close(pipe_fd[0]);
+	close(pipe_fd[1]);
+	
+	/* Ignore signals while children are running */
+	setup_parent_signals();
+	
+	waitpid(left_pid, &left_status, 0);
+	waitpid(right_pid, &right_status, 0);
+
+	/* Restore original signal handlers after children complete */
+	set_signal();
+
+	/* Return exit status of right command (bash behavior) */
+	if (WIFEXITED(right_status))
+		return (WEXITSTATUS(right_status));
+	else if (WIFSIGNALED(right_status))
+		return (128 + WTERMSIG(right_status));
+	
 	return (1);
 }
 

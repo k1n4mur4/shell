@@ -1,4 +1,5 @@
 #include "minishell.h"
+#include "signal_handler.h"
 
 int	shell(int argc, char **argv, char **envp)
 {
@@ -8,8 +9,7 @@ int	shell(int argc, char **argv, char **envp)
 		return (127);
 	}
 	initialize_enviroment(envp);
-	// shell_initialize();
-	// set_bash_input();
+	shell_initialize();
 	reader_loop();
 	exit_shell();
 	return (exit_value(0, GET));
