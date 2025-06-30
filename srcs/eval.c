@@ -16,7 +16,7 @@ int	reader_loop(void)
 		if (!*(command.current_command))
 			continue ;
 		set_deftext(command.current_command);
-		// parser(&command);
+		parser(&command);
 		execute_command(&command);
 		dispose_command(&command);
 	}
