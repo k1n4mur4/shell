@@ -2,17 +2,11 @@
 # define MINISHELL_H
 
 #include <stdlib.h>
-// #include <readline/readline.h>
-// #include <readline/history.h>
-#include "type.h"
+#include "exit_shell.h"
 #include "env.h"
 #include "libft.h"
-
-#define ENAME	"minishell"
-
-
-// exit_shell.c
-void	exit_shell(void);
+#include "eval.h"
+#include "define.h"
 
 // shell.c
 int	shell(int argc, char **argv, char **envp);

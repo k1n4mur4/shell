@@ -1,5 +1,7 @@
-#ifndef TYPE_H
-#define TYPE_H
+#ifndef DEFINE_H
+#define DEFINE_H
+
+#define ENAME	"minishell"
 
 typedef enum e_type
 {

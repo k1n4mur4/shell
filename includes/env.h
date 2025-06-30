@@ -2,7 +2,8 @@
 #define ENV_H
 
 #include <unistd.h>
-#include "type.h"
+
+#include "define.h"
 
 #include "libft.h"
 #include "ft_printf.h"
