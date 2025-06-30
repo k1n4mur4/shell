@@ -12,8 +12,6 @@
 #define ERROR_PERMISSION_PREFIX	ENAME ": permission denied: "
 #define ERROR_NO_SUCH_FILE	ENAME ": no such file or directory: "
 
-/* Global signal variable (42 project allows only one global variable) */
-extern volatile sig_atomic_t	g_signal_received;
 
 typedef enum e_type
 {

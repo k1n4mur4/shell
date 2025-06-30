@@ -2,66 +2,43 @@
 #include "signal_handler.h"
 
 /*
- * Main REPL (Read-Eval-Print Loop) for the minishell
+ * minishellのメインREPL（Read-Eval-Print Loop）
  * 
- * This function handles:
- * - Signal management (SIGINT/SIGQUIT)
- * - User input reading with readline
- * - Command parsing and execution
- * - Memory management for input and command structures
- * - Proper cleanup and error handling
+ * この関数が処理する内容:
+ * - シグナル管理（SIGINTを処理、SIGQUITは完全に無視）
+ * - readlineによるユーザー入力の読み取り
+ * - コマンドの解析と実行
+ * - 入力とコマンド構造体のメモリ管理
+ * - 適切なクリーンアップとエラーハンドリング
  * 
- * Returns: exit status of the last executed command
+ * 戻り値: 最後に実行されたコマンドの終了ステータス
  */
 int	reader_loop(void)
 {
 	t_command			command;
-	char				*prompt;
 
-	/* Initialize signal handlers for interactive mode */
+	/* インタラクティブモード用のシグナルハンドラーを初期化 */
 	set_signal();
-	
 	while (1)
 	{
-		/* Reset signal flag before reading input to handle Ctrl+C */
-		g_signal_received = 0;
-		
-		/* Create prompt string and read user input */
-		prompt = ft_strjoin(ENAME, "$ ");
-		if (!prompt)
-			break ;  /* Memory allocation failure - exit gracefully */
-		
-		command.current_command = readline(prompt);
-		free(prompt);  /* Free prompt immediately after use */
-		
-		/* Handle Ctrl+D (EOF) - user wants to exit */
+		command.current_command = readline(ft_strjoin(ENAME, "$ "));
+		/* Ctrl+D（EOF）を処理 - ユーザーが終了を要求 */
 		if (!command.current_command)
 		{
 			write(2, "exit\n", 5);
 			break ;
 		}
-		
-		/* Handle SIGINT received during readline - start new prompt */
-		if (g_signal_received == SIGINT)
-		{
-			g_signal_received = 0;
-			free(command.current_command);
-			continue ;
-		}
-		
-		/* Skip empty commands (just whitespace or empty input) */
+		/* 空のコマンドをスキップ（空白のみまたは空の入力） */
 		if (!*(command.current_command))
 		{
 			free(command.current_command);
 			continue ;
 		}
-		
-		/* Process valid command: parse, execute, cleanup */
-		set_deftext(command.current_command);  /* Add to history */
-		parser(&command);                      /* Parse into AST */
-		execute_command(&command);             /* Execute parsed command */
-		dispose_command(&command);             /* Clean up memory */
+		/* 有効なコマンドを処理: 解析、実行、クリーンアップ */
+		set_deftext(command.current_command);  /* 履歴に追加 */
+		parser(&command);                      /* ASTに解析 */
+		execute_command(&command);             /* 解析されたコマンドを実行 */
+		dispose_command(&command);             /* メモリをクリーンアップ */
 	}
-	
 	return (exit_value(0, GET));
 }

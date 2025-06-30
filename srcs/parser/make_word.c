@@ -40,15 +40,25 @@ t_word_desc	*make_word_flags(t_word_desc *w, const char *string)
 
 	i = 0;
 	slen = ft_strlen(string);
-	while (i < slen)
+	
+	/* Check for specific operators first */
+	if (ft_strcmp(string, "||") == 0)
+		w->flags |= W_OR;
+	else if (ft_strcmp(string, "&&") == 0)
+		w->flags |= W_AND;
+	else if (ft_strcmp(string, "|") == 0)
+		w->flags |= W_PIPE;
+	else
 	{
-		if (string[i] == '$')
-			w->flags |= W_HASDOLLAR;
-		if (string[i] == '\'' || string[i] == '`' || string[i] == '"')
-			w->flags |= W_QUOTED;
-		if (string[i] == '|')
-			w->flags |= W_PIPE;
-		i++;
+		/* Check character-based flags */
+		while (i < slen)
+		{
+			if (string[i] == '$')
+				w->flags |= W_HASDOLLAR;
+			if (string[i] == '\'' || string[i] == '`' || string[i] == '"')
+				w->flags |= W_QUOTED;
+			i++;
+		}
 	}
 	return (w);
 }

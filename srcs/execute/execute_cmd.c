@@ -183,32 +183,66 @@ static int	execute_pipeline(t_command *left, t_command *right)
 	return (1);
 }
 
-/* Execute binary command (AND/OR) */
+/* 
+ * Execute binary command (AND/OR operators)
+ * 
+ * Implements short-circuit evaluation:
+ * - AND (&&): Execute right only if left succeeds (exit code 0)
+ * - OR (||):  Execute right only if left fails (exit code != 0)
+ * 
+ * Returns: Final exit code of the last executed command
+ */
 static int	execute_binary_command(t_command *left, t_command *right, t_command_type type)
 {
 	int	left_exit;
+	int	final_exit;
 	
+	/* Validate input parameters */
 	if (!left)
+	{
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "binary command: missing left operand\n");
 		return (1);
+	}
+	
+	if (type != CM_AND && type != CM_OR)
+	{
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "binary command: invalid operator type\n");
+		return (1);
+	}
 	
 	/* Execute left command first */
 	execute_command(left);
 	left_exit = exit_value(0, GET);
+	final_exit = left_exit;
 	
 	if (type == CM_AND)
 	{
-		/* Execute right only if left succeeded */
-		if (left_exit == 0 && right)
-			execute_command(right);
-		return (exit_value(0, GET));
+		/* AND operator: Execute right only if left succeeded (exit code 0) */
+		if (left_exit == 0)
+		{
+			if (right)
+			{
+				execute_command(right);
+				final_exit = exit_value(0, GET);
+			}
+			/* If no right command, return left's success status */
+		}
+		/* If left failed, return left's failure status without executing right */
 	}
 	else if (type == CM_OR)
 	{
-		/* Execute right only if left failed */
-		if (left_exit != 0 && right)
-			execute_command(right);
-		return (exit_value(0, GET));
+		/* OR operator: Execute right only if left failed (exit code != 0) */
+		if (left_exit != 0)
+		{
+			if (right)
+			{
+				execute_command(right);
+				final_exit = exit_value(0, GET);
+			}
+			/* If no right command, return left's failure status */
+		}
+		/* If left succeeded, return left's success status without executing right */
 	}
 	
-	return (left_exit);
+	return (final_exit);
 }

@@ -80,6 +80,12 @@ static void	print_ast(t_command *cmd, int depth)
 		print_ast(cmd->left, depth + 1);
 		print_ast(cmd->right, depth + 1);
 	}
+	else if (cmd->type == CM_OR)
+	{
+		ft_dprintf(STDOUT_FILENO, "OR:\n");
+		print_ast(cmd->left, depth + 1);
+		print_ast(cmd->right, depth + 1);
+	}
 }
 
 /* Parse command line into word list */
@@ -110,12 +116,12 @@ static t_command	*parse_and_or(t_word_list **tokens)
 	left = parse_pipeline(tokens);
 	if (!left)
 		return (NULL);
-	while (*tokens && (*tokens)->word->word && 
-		   ft_strcmp((*tokens)->word->word, "&&") == 0)
+	while (*tokens && ((*tokens)->word->flags & (W_AND | W_OR)))
 	{
+		int is_and = ((*tokens)->word->flags & W_AND);
 		*tokens = (*tokens)->next;
 		
-		/* Check for missing command after && operator */
+		/* Check for missing command after &&/|| operator */
 		if (!*tokens)
 		{
 			parser_error(NULL, ERROR_PARSE, "\\n");
@@ -129,7 +135,7 @@ static t_command	*parse_and_or(t_word_list **tokens)
 			dispose_ast_command(left);
 			return (NULL);
 		}
-		left = make_binary_command(CM_AND, left, right);
+		left = make_binary_command(is_and ? CM_AND : CM_OR, left, right);
 		if (!left)
 		{
 			dispose_ast_command(right);
@@ -194,7 +200,7 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 		current = *tokens;
 		if (current->word->flags & W_PIPE)
 			break ;
-		if (current->word->word && ft_strcmp(current->word->word, "&&") == 0)
+		if (current->word->flags & (W_AND | W_OR))
 			break ;
 		if (is_redirect_operator(current->word->word))
 		{
@@ -284,25 +290,25 @@ void	parser(t_command *command)
 
 	if (!command || !command->current_command)
 		return ;
-	ft_dprintf(STDOUT_FILENO, "Parsing: '%s'\n", command->current_command);
+	/* ft_dprintf(STDOUT_FILENO, "Parsing: '%s'\n", command->current_command); */
 	word_list = parse_command_line(command->current_command);
 	if (!word_list)
 	{
-		ft_dprintf(STDOUT_FILENO, "No tokens parsed\n");
+		/* ft_dprintf(STDOUT_FILENO, "No tokens parsed\n"); */
 		return ;
 	}
-	ft_dprintf(STDOUT_FILENO, "Tokens:\n");
-	print_word_list(word_list);
+	/* ft_dprintf(STDOUT_FILENO, "Tokens:\n");
+	print_word_list(word_list); */
 	ast = parse_tokens_to_ast(word_list);
 	if (ast)
 	{
-		ft_dprintf(STDOUT_FILENO, "AST before expansion:\n");
-		print_ast(ast, 0);
+		/* ft_dprintf(STDOUT_FILENO, "AST before expansion:\n");
+		print_ast(ast, 0); */
 		
 		expand_ast(ast);
 		
-		ft_dprintf(STDOUT_FILENO, "AST after expansion:\n");
-		print_ast(ast, 0);
+		/* ft_dprintf(STDOUT_FILENO, "AST after expansion:\n");
+		print_ast(ast, 0); */
 		
 		/* Copy AST structure to command for execution */
 		command->type = ast->type;
@@ -316,6 +322,6 @@ void	parser(t_command *command)
 		dispose_ast_command(ast);
 	}
 	else
-		ft_dprintf(STDOUT_FILENO, "Failed to create AST\n");
+		/* ft_dprintf(STDOUT_FILENO, "Failed to create AST\n"); */
 	dispose_words(word_list);
 }

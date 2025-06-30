@@ -54,6 +54,8 @@ static char	*extract_operator(const char **input)
 		*input += 2;
 	else if (**input == '&' && *(*input + 1) == '&')
 		*input += 2;
+	else if (**input == '|' && *(*input + 1) == '|')
+		*input += 2;
 	else
 		(*input)++;
 	len = *input - start;

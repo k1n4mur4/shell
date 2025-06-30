@@ -12,6 +12,8 @@
 # define W_ASSIGNMENT	0x0008	/* Word is assignment */
 # define W_GLOBPAT		0x0010	/* Word is glob pattern */
 # define W_NOGLOB		0x0020	/* No glob expansion */
+# define W_AND			0x0040	/* Word is && */
+# define W_OR			0x0080	/* Word is || */
 
 /* Word creation functions */
 t_word_desc		*alloc_word_desc(void);
