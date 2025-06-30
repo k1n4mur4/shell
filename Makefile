@@ -13,11 +13,19 @@ LIBFT_A		=	$(LIBFT_DIR)/$(LIBFT).a
 
 # Directories
 SRCS_DIR	=	./srcs
+COM_DIR		=	$(SRCS_DIR)/command
+EXEC_DIR	=	$(SRCS_DIR)/execute
+PARS_DIR	=	$(SRCS_DIR)/parser
+
 
 OBJS_DIR	=	./objs
 
 # Sources
 SRCS		=	$(wildcard $(SRCS_DIR)/*.c)
+COM_SRCS	=	$(wildcard $(COM_DIR)/*.c)
+EXEC_SRCS	=	$(wildcard $(EXEC_DIR)/*.c)
+PARS_SRCS	=	$(wildcard $(PARS_DIR)/*.c)
+SRCS		+=	$(COM_SRCS) $(EXEC_SRCS) $(PARS_SRCS)
 
 # Objects
 OBJS		=	$(SRCS:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)

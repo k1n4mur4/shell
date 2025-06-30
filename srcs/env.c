@@ -72,20 +72,14 @@ void	add_env_list(t_env *env, t_env *env_list)
 
 void	show_env_list(t_env *env_list)
 {
-	char	*key;
-	char	*value;
-
 	while (env_list)
 	{
-		key = env_list->key;
-		value = env_list->value;
-		if (key)
+		if (env_list->key)
 		{
-			ft_fputs(key, STDOUT_FILENO);
-			write(STDOUT_FILENO, ":", 1);
-			if (value)
-				ft_fputs(value, STDOUT_FILENO);
-			write(STDOUT_FILENO, "\n", 1);
+			ft_dprintf(STDOUT_FILENO, "%s", env_list->key);
+			if (env_list->value)
+				ft_dprintf(STDOUT_FILENO, "=%s", env_list->value);
+			ft_dprintf(STDOUT_FILENO, "\n");
 		}
 		env_list = env_list->next;
 	}
