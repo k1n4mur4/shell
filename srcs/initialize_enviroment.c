@@ -54,13 +54,22 @@ t_env	*initialize_env(char *envp)
 
 void	initialize_enviroment(char **envp)
 {
+	int	count;
+
 	if (!envp || !*envp)
+	{
+		ft_dprintf(STDERR_FILENO, "Warning: No environment variables found\n");
 		return;
+	}
+	count = 0;
 	env(initialize_env(*envp), SET);
 	envp++;
+	count++;
 	while (*envp)
 	{
 		env(initialize_env(*envp), ADD);
 		envp++;
+		count++;
 	}
+	ft_dprintf(STDERR_FILENO, "Initialized %d environment variables\n", count);
 }

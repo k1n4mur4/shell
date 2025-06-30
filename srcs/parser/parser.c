@@ -198,15 +198,15 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 			break ;
 		if (is_redirect_operator(current->word->word))
 		{
-			/* Determine redirection type */
-			if (ft_strcmp(current->word->word, "<") == 0)
-				type = R_INPUT;
-			else if (ft_strcmp(current->word->word, ">") == 0)
-				type = R_OUTPUT;
-			else if (ft_strcmp(current->word->word, ">>") == 0)
+			/* Determine redirection type (check longer operators first) */
+			if (ft_strcmp(current->word->word, ">>") == 0)
 				type = R_APPEND;
 			else if (ft_strcmp(current->word->word, "<<") == 0)
 				type = R_HEREDOC;
+			else if (ft_strcmp(current->word->word, "<") == 0)
+				type = R_INPUT;
+			else if (ft_strcmp(current->word->word, ">") == 0)
+				type = R_OUTPUT;
 			else
 			{
 				*tokens = (*tokens)->next;
@@ -303,6 +303,16 @@ void	parser(t_command *command)
 		
 		ft_dprintf(STDOUT_FILENO, "AST after expansion:\n");
 		print_ast(ast, 0);
+		
+		/* Copy AST structure to command for execution */
+		command->type = ast->type;
+		command->simple = ast->simple;
+		command->left = ast->left;
+		command->right = ast->right;
+		/* Prevent double-free by clearing ast pointers */
+		ast->simple = NULL;
+		ast->left = NULL;
+		ast->right = NULL;
 		dispose_ast_command(ast);
 	}
 	else
