@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "error.h"
 
 /* Static function declarations */
 static t_command	*parse_pipeline(t_word_list **tokens);
@@ -113,6 +114,15 @@ static t_command	*parse_and_or(t_word_list **tokens)
 		   ft_strcmp((*tokens)->word->word, "&&") == 0)
 	{
 		*tokens = (*tokens)->next;
+		
+		/* Check for missing command after && operator */
+		if (!*tokens)
+		{
+			parser_error(NULL, ERROR_PARSE, "\\n");
+			dispose_ast_command(left);
+			return (NULL);
+		}
+		
 		right = parse_pipeline(tokens);
 		if (!right)
 		{
@@ -141,6 +151,15 @@ static t_command	*parse_pipeline(t_word_list **tokens)
 	while (*tokens && ((*tokens)->word->flags & W_PIPE))
 	{
 		*tokens = (*tokens)->next;
+		
+		/* Check for missing command after pipe */
+		if (!*tokens)
+		{
+			parser_error(NULL, ERROR_PARSE, "\\n");
+			dispose_ast_command(left);
+			return (NULL);
+		}
+		
 		right = parse_simple_command(tokens);
 		if (!right)
 		{
@@ -179,6 +198,7 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 			break ;
 		if (is_redirect_operator(current->word->word))
 		{
+			/* Determine redirection type */
 			if (ft_strcmp(current->word->word, "<") == 0)
 				type = R_INPUT;
 			else if (ft_strcmp(current->word->word, ">") == 0)
@@ -192,9 +212,29 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 				*tokens = (*tokens)->next;
 				continue ;
 			}
+			
 			*tokens = (*tokens)->next;
+			
+			/* Check for missing filename after redirection operator */
 			if (!*tokens || !(*tokens)->word)
-				break ;
+			{
+				parser_error(NULL, ERROR_PARSE, "\\n");
+				dispose_words(words);
+				dispose_redirects(redirects);
+				return (NULL);
+			}
+			
+			/* Check for invalid redirection target (operators) */
+			if (is_redirect_operator((*tokens)->word->word) || 
+				((*tokens)->word->flags & W_PIPE) ||
+				((*tokens)->word->word && ft_strcmp((*tokens)->word->word, "&&") == 0))
+			{
+				parser_error(NULL, ERROR_PARSE, (*tokens)->word->word);
+				dispose_words(words);
+				dispose_redirects(redirects);
+				return (NULL);
+			}
+			
 			new_redirect = make_redirect(type, (*tokens)->word->word);
 			if (new_redirect)
 			{
