@@ -37,7 +37,7 @@ void	set_signal(void)
 	/* Set SIGINT handler (Ctrl+C) */
 	if (sigaction(SIGINT, &sa, NULL) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: failed to set SIGINT handler\n");
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "failed to set SIGINT handler\n");
 		return ;
 	}
 
@@ -45,7 +45,7 @@ void	set_signal(void)
 	sa.sa_handler = signal_handler;
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: failed to set SIGQUIT handler\n");
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "failed to set SIGQUIT handler\n");
 		return ;
 	}
 }

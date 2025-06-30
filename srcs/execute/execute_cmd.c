@@ -70,7 +70,7 @@ static int	execute_simple_command(t_simple_command *simple)
 		command_path = find_command_path(command_name);
 		if (!command_path)
 		{
-			ft_dprintf(STDERR_FILENO, "minishell: %s: command not found\n", command_name);
+			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: command not found\n", command_name);
 			exit_code = 127;
 		}
 		else
@@ -103,7 +103,7 @@ static int	execute_pipeline(t_command *left, t_command *right)
 	/* Create pipe */
 	if (pipe(pipe_fd) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: pipe failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "pipe failed: %s\n", strerror(errno));
 		return (1);
 	}
 
@@ -111,7 +111,7 @@ static int	execute_pipeline(t_command *left, t_command *right)
 	left_pid = fork();
 	if (left_pid == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: fork failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n", strerror(errno));
 		close(pipe_fd[0]);
 		close(pipe_fd[1]);
 		return (1);
@@ -124,7 +124,7 @@ static int	execute_pipeline(t_command *left, t_command *right)
 		close(pipe_fd[0]);					/* Close read end */
 		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
 		{
-			ft_dprintf(STDERR_FILENO, "minishell: dup2 failed: %s\n", strerror(errno));
+			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "dup2 failed: %s\n", strerror(errno));
 			close(pipe_fd[1]);
 			exit(1);
 		}
@@ -137,7 +137,7 @@ static int	execute_pipeline(t_command *left, t_command *right)
 	right_pid = fork();
 	if (right_pid == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: fork failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n", strerror(errno));
 		close(pipe_fd[0]);
 		close(pipe_fd[1]);
 		kill(left_pid, SIGTERM);			/* Terminate left child */
@@ -152,7 +152,7 @@ static int	execute_pipeline(t_command *left, t_command *right)
 		close(pipe_fd[1]);					/* Close write end */
 		if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
 		{
-			ft_dprintf(STDERR_FILENO, "minishell: dup2 failed: %s\n", strerror(errno));
+			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "dup2 failed: %s\n", strerror(errno));
 			close(pipe_fd[0]);
 			exit(1);
 		}

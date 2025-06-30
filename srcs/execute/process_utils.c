@@ -167,7 +167,7 @@ int	wait_for_child_process(pid_t pid)
 
 	if (waitpid(pid, &status, 0) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: waitpid failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "waitpid failed: %s\n", strerror(errno));
 		return (1);
 	}
 	
@@ -210,7 +210,7 @@ int	execute_external_command(const char *command_path, t_word_list *args)
 	pid = fork();
 	if (pid == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: fork failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n", strerror(errno));
 		free_argv_array(argv);
 		free_envp_array(envp);
 		return (1);
@@ -222,7 +222,7 @@ int	execute_external_command(const char *command_path, t_word_list *args)
 		
 		if (execve(command_path, argv, envp) == -1)
 		{
-			ft_dprintf(STDERR_FILENO, "minishell: %s: %s\n", command_path, strerror(errno));
+			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_path, strerror(errno));
 			free_argv_array(argv);
 			free_envp_array(envp);
 			exit(127);
