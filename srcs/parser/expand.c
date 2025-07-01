@@ -27,7 +27,7 @@ static char	*get_env_value(const char *var_name)
 static char	*get_special_var(char c)
 {
 	if (c == '?')
-		return (ft_itoa(exit_value(GET, 0)));
+		return (ft_itoa(exit_value(0, GET)));
 	else if (c == '$')
 		return (ft_itoa(getpid()));
 	return (ft_strdup(""));
