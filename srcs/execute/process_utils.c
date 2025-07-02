@@ -225,7 +225,12 @@ int	execute_external_command(const char *command_path, t_word_list *args)
 			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_path, strerror(errno));
 			free_argv_array(argv);
 			free_envp_array(envp);
-			exit(127);
+			
+			/* Return appropriate exit code based on errno */
+			if (errno == EACCES)
+				_exit(126);  /* Permission denied */
+			else
+				_exit(127);  /* Command not found or other error */
 		}
 	}
 	else

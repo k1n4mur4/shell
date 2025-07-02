@@ -1,4 +1,5 @@
 #include "signal_handler.h"
+#include "redirect_utils.h"
 #include "libft.h"
 #include "ft_printf.h"
 #include <unistd.h>
@@ -8,6 +9,8 @@ void	signal_handler(int signum)
 {
 	if (signum == SIGINT)
 	{
+		/* heredoc中断時に一時ファイルをクリーンアップ */
+		cleanup_all_temp_files();
 		/* 改行を出力してreadlineを新しい行に設定 */
 		ft_dprintf(STDOUT_FILENO, "\n");
 		rl_on_new_line();

@@ -1,6 +1,19 @@
 #include "eval.h"
 #include "signal_handler.h"
 
+/* Shell termination flag management */
+static int	g_shell_exit_flag = 0;
+
+void	set_shell_exit_flag(int flag)
+{
+	g_shell_exit_flag = flag;
+}
+
+int	should_shell_exit(void)
+{
+	return (g_shell_exit_flag);
+}
+
 /*
  * minishellのメインREPL（Read-Eval-Print Loop）
  * 
@@ -21,6 +34,10 @@ int	reader_loop(void)
 	set_signal();
 	while (1)
 	{
+		/* Check for exit flag before reading new command */
+		if (should_shell_exit())
+			break ;
+			
 		command.current_command = readline(ft_strjoin(ENAME, "$ "));
 		/* Ctrl+D（EOF）を処理 - ユーザーが終了を要求 */
 		if (!command.current_command)

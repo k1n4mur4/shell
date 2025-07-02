@@ -72,12 +72,53 @@ main() → shell() → reader_loop() → [parser() → execute_command()]
 - `execute/execute_cmd.c`: コマンド実行（現在空関数）
 
 ### データ構造の継承関係
+
+#### **AST（抽象構文木）ベースのコマンド表現**
 ```c
-// command.h - 基本構造（現状シンプル）
+// command.h - 階層的なコマンド構造
 typedef struct s_command {
-    char *current_command;  // readline()からの入力文字列
+    t_command_type      type;           // CM_SIMPLE, CM_PIPE, CM_AND, CM_OR
+    t_simple_command    *simple;        // シンプルコマンドの詳細
+    struct s_command    *left;          // 左の子ノード（パイプ、論理演算子用）
+    struct s_command    *right;         // 右の子ノード
+    char                *current_command; // 元の入力文字列
 } t_command;
 
+typedef struct s_simple_command {
+    t_word_list    *words;      // コマンドと引数のリスト
+    t_redirect     *redirects;  // リダイレクションのリスト
+} t_simple_command;
+```
+
+#### **ワードフラグシステム**
+```c
+// make_cmd.h - 詳細なワード分類システム
+typedef struct s_word_desc {
+    char    *word;      // 文字列本体
+    int     flags;      // W_HASDOLLAR, W_QUOTED, W_PIPE等のフラグ
+} t_word_desc;
+
+// 主要なワードフラグ
+#define W_HASDOLLAR     0x0001  // $変数展開あり
+#define W_QUOTED        0x0002  // クォート文字列
+#define W_PIPE          0x0004  // パイプ演算子
+#define W_ASSIGNMENT    0x0008  // 変数代入
+#define W_GLOBPAT       0x0010  // glob パターン
+#define W_AND           0x0040  // && 演算子
+#define W_OR            0x0080  // || 演算子
+```
+
+#### **リダイレクション管理**
+```c
+typedef struct s_redirect {
+    t_redirect_type     type;       // R_INPUT, R_OUTPUT, R_APPEND, R_HEREDOC
+    char                *filename;  // ファイル名
+    struct s_redirect   *next;      // 複数リダイレクションのチェーン
+} t_redirect;
+```
+
+#### **環境変数管理**
+```c
 // env.h - 完全実装済み
 typedef struct s_env {
     char *key;
@@ -110,9 +151,30 @@ typedef struct s_env {
 - **メモリ管理**: libftのft_calloc/freeを使用、readlineの戻り値は必ずfree
 
 ## 重要な実装制約
-- `t_command.current_command`は現在文字列のみ（将来的に構造化予定）
-- 既存の`env()`シングルトンパターンを壊さないこと
-- `exit_value()`システムとの整合性を保つこと
+- **AST構造の保持**: `t_command`は階層的な木構造を維持すること
+- **ワードフラグの活用**: 展開・処理時は`t_word_desc.flags`を正確に使用すること
+- **既存の`env()`シングルトンパターンを壊さないこと**
+- **`exit_value()`システムとの整合性を保つこと**
+- **メモリ管理**: AST全体を`dispose_ast_command()`で適切に解放すること
+
+## 実装時の重要な考慮事項
+
+### コマンド処理の流れ
+```
+入力文字列 → lexer → parser → AST構築 → expand → execute
+```
+
+### ワードフラグの使い分け
+- `W_HASDOLLAR`: 変数展開が必要な単語
+- `W_QUOTED`: クォートされた文字列（特殊文字の無効化）
+- `W_PIPE`, `W_AND`, `W_OR`: 演算子の識別
+- `W_GLOBPAT`: glob展開が必要なパターン
+
+### AST実行パターン
+- `CM_SIMPLE`: 単純コマンドの実行
+- `CM_PIPE`: パイプによるプロセス間通信
+- `CM_AND`: 左が成功した場合のみ右を実行
+- `CM_OR`: 左が失敗した場合のみ右を実行
 
 ## 追加指示
 - 日本語で返答してください

@@ -30,8 +30,12 @@ static void	print_ast(t_command *cmd, int depth)
 
 	if (!cmd)
 		return ;
-	for (i = 0; i < depth; i++)
+	i = 0;
+	while (i < depth)
+	{
 		ft_dprintf(STDOUT_FILENO, "  ");
+		i++;
+	}
 	if (cmd->type == CM_SIMPLE)
 	{
 		t_redirect *redir;
@@ -135,7 +139,10 @@ static t_command	*parse_and_or(t_word_list **tokens)
 			dispose_ast_command(left);
 			return (NULL);
 		}
-		left = make_binary_command(is_and ? CM_AND : CM_OR, left, right);
+		if (is_and)
+			left = make_binary_command(CM_AND, left, right);
+		else
+			left = make_binary_command(CM_OR, left, right);
 		if (!left)
 		{
 			dispose_ast_command(right);

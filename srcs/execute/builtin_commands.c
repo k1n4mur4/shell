@@ -1,4 +1,5 @@
 #include "builtin.h"
+#include "eval.h"
 
 /* Check if command is a builtin */
 int	is_builtin_command(const char *command)
@@ -42,27 +43,89 @@ int	execute_builtin(const char *command, t_word_list *args)
 	return (127);
 }
 
+/* Process escape sequences in string for echo -e */
+static void	echo_escape_sequences(const char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == '\\' && str[i + 1])
+		{
+			i++;
+			if (str[i] == 'n')
+				ft_dprintf(STDOUT_FILENO, "\n");
+			else if (str[i] == 't')
+				ft_dprintf(STDOUT_FILENO, "\t");
+			else if (str[i] == 'r')
+				ft_dprintf(STDOUT_FILENO, "\r");
+			else if (str[i] == 'b')
+				ft_dprintf(STDOUT_FILENO, "\b");
+			else if (str[i] == 'a')
+				ft_dprintf(STDOUT_FILENO, "\a");
+			else if (str[i] == 'v')
+				ft_dprintf(STDOUT_FILENO, "\v");
+			else if (str[i] == 'f')
+				ft_dprintf(STDOUT_FILENO, "\f");
+			else if (str[i] == '\\')
+				ft_dprintf(STDOUT_FILENO, "\\");
+			else
+			{
+				ft_dprintf(STDOUT_FILENO, "\\");
+				ft_dprintf(STDOUT_FILENO, "%c", str[i]);
+			}
+		}
+		else
+			ft_dprintf(STDOUT_FILENO, "%c", str[i]);
+		i++;
+	}
+}
+
 /* echo builtin command */
 int	builtin_echo(t_word_list *args)
 {
 	int			newline;
+	int			interpret_escapes;
 	t_word_list	*current;
 
 	newline = 1;
+	interpret_escapes = 0;
 	current = args;
-	/* Check for -n flag */
-	if (current && current->word && current->word->word &&
-		ft_strcmp(current->word->word, "-n") == 0)
+	
+	/* Check for flags */
+	while (current && current->word && current->word->word && current->word->word[0] == '-')
 	{
-		newline = 0;
-		current = current->next;
+		if (ft_strcmp(current->word->word, "-n") == 0)
+		{
+			newline = 0;
+			current = current->next;
+		}
+		else if (ft_strcmp(current->word->word, "-e") == 0)
+		{
+			interpret_escapes = 1;
+			current = current->next;
+		}
+		else if (ft_strcmp(current->word->word, "-ne") == 0 || ft_strcmp(current->word->word, "-en") == 0)
+		{
+			newline = 0;
+			interpret_escapes = 1;
+			current = current->next;
+		}
+		else
+			break;
 	}
+	
 	/* Print arguments */
 	while (current)
 	{
 		if (current->word && current->word->word)
 		{
-			ft_dprintf(STDOUT_FILENO, "%s", current->word->word);
+			if (interpret_escapes)
+				echo_escape_sequences(current->word->word);
+			else
+				ft_dprintf(STDOUT_FILENO, "%s", current->word->word);
+			
 			if (current->next)
 				ft_dprintf(STDOUT_FILENO, " ");
 		}
@@ -95,36 +158,85 @@ int	builtin_env(t_word_list *args)
 {
 	t_env	*env_list;
 
-	(void)args;
-	env_list = env(NULL, GET);
-	if (!env_list)
-		ft_dprintf(STDERR_FILENO, "Error: No environment variables available\n");
-	else
+	/* env command doesn't take arguments in standard implementation */
+	if (args)
 	{
-		ft_dprintf(STDERR_FILENO, "DEBUG: Environment list found, displaying...\n");
-		show_env_list(env_list);
+		ft_dprintf(STDERR_FILENO, "env: '%s': No such file or directory\n", args->word->word);
+		return (127);
+	}
+	
+	env_list = env(NULL, GET);
+	while (env_list)
+	{
+		if (env_list->key && env_list->value)
+			ft_dprintf(STDOUT_FILENO, "%s=%s\n", env_list->key, env_list->value);
+		env_list = env_list->next;
 	}
 	return (0);
+}
+
+/* Check if string is a valid number */
+static int	is_valid_number(const char *str)
+{
+	int	i;
+
+	if (!str || !str[0])
+		return (0);
+	
+	i = 0;
+	if (str[i] == '+' || str[i] == '-')
+		i++;
+	
+	if (!str[i])
+		return (0);
+	
+	while (str[i])
+	{
+		if (!ft_isdigit(str[i]))
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
 /* exit builtin command */
 int	builtin_exit(t_word_list *args)
 {
-	int	exit_code;
+	int			exit_code;
+	long long	temp_code;
 
 	exit_code = 0;
 	ft_dprintf(STDOUT_FILENO, "exit\n");
+	
 	if (args && args->word && args->word->word)
 	{
-		exit_code = ft_atoi(args->word->word);
+		/* Check for too many arguments */
 		if (args->next)
 		{
 			ft_dprintf(STDERR_FILENO, "minishell: exit: too many arguments\n");
 			return (1);
 		}
+		
+		/* Validate numeric argument */
+		if (!is_valid_number(args->word->word))
+		{
+			ft_dprintf(STDERR_FILENO, "minishell: exit: %s: numeric argument required\n", 
+				args->word->word);
+			exit_code = 2;
+		}
+		else
+		{
+			temp_code = ft_atoi(args->word->word);
+			/* Ensure exit code is in valid range (0-255) */
+			exit_code = (int)(temp_code & 255);
+		}
 	}
+	
+	/* Set exit code and flag shell for termination */
 	exit_value(exit_code, SET);
-	exit(exit_code);
+	set_shell_exit_flag(1);
+	
+	/* Return exit code (shell will terminate via flag check) */
 	return (exit_code);
 }
 
@@ -135,9 +247,17 @@ int	builtin_cd(t_word_list *args)
 	char	*home;
 	t_env	*env_list;
 
+	/* Check for too many arguments */
+	if (args && args->next)
+	{
+		ft_dprintf(STDERR_FILENO, "minishell: cd: too many arguments\n");
+		return (1);
+	}
+
 	if (!args || !args->word || !args->word->word)
 	{
 		env_list = env(NULL, GET);
+		home = NULL;
 		while (env_list)
 		{
 			if (ft_strcmp(env_list->key, "HOME") == 0)
@@ -183,23 +303,63 @@ int	builtin_export(t_word_list *args)
 	{
 		if (current->word && current->word->word)
 		{
+			/* Check for valid variable name */
+			if (!ft_isalpha(current->word->word[0]) && current->word->word[0] != '_')
+			{
+				ft_dprintf(STDERR_FILENO, "minishell: export: `%s': not a valid identifier\n", 
+					current->word->word);
+				current = current->next;
+				continue;
+			}
+			
 			equal_pos = ft_strchr(current->word->word, '=');
 			if (equal_pos)
 			{
 				*equal_pos = '\0';
-				key = current->word->word;
-				value = equal_pos + 1;
-				new_env = make_env_list(key, value);
-				if (new_env)
-					add_env_list(env(NULL, GET), new_env);
+				key = ft_strdup(current->word->word);
+				value = ft_strdup(equal_pos + 1);
 				*equal_pos = '=';
+				if (key && value)
+				{
+					new_env = make_env_list(key, value);
+					if (new_env)
+						add_env_list(env(NULL, GET), new_env);
+					else
+					{
+						free(key);
+						free(value);
+					}
+				}
+				else
+				{
+					if (key)
+						free(key);
+					if (value)
+						free(value);
+				}
 			}
 			else
 			{
-				key = current->word->word;
-				new_env = make_env_list(key, "");
-				if (new_env)
-					add_env_list(env(NULL, GET), new_env);
+				key = ft_strdup(current->word->word);
+				value = ft_strdup("");
+				if (key && value)
+				{
+					new_env = make_env_list(key, value);
+					if (new_env)
+						add_env_list(env(NULL, GET), new_env);
+					else
+					{
+						free(key);
+						free(value);
+					}
+				}
+				else
+				{
+					if (key)
+						free(key);
+					if (value)
+						free(value);
+				}
 			}
 		}
 		current = current->next;

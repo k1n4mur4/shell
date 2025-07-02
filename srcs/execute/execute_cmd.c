@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 /* Forward declarations */
 static int	execute_simple_command(t_simple_command *simple);
@@ -70,8 +71,31 @@ static int	execute_simple_command(t_simple_command *simple)
 		command_path = find_command_path(command_name);
 		if (!command_path)
 		{
-			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: command not found\n", command_name);
-			exit_code = 127;
+			/* Check if command contains '/' to determine error message */
+			if (ft_strchr(command_name, '/'))
+			{
+				/* For paths, check if file exists */
+				if (access(command_name, F_OK) == -1)
+				{
+					ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: No such file or directory\n", command_name);
+					exit_code = 127;
+				}
+				else if (access(command_name, X_OK) == -1)
+				{
+					ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: Permission denied\n", command_name);
+					exit_code = 126;
+				}
+				else
+				{
+					ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: command not found\n", command_name);
+					exit_code = 127;
+				}
+			}
+			else
+			{
+				ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: command not found\n", command_name);
+				exit_code = 127;
+			}
 		}
 		else
 		{
@@ -84,7 +108,6 @@ static int	execute_simple_command(t_simple_command *simple)
 	/* Restore original file descriptors */
 	if (simple->redirects)
 		restore_redirections(&backup);
-	
 	return (exit_code);
 }
 
@@ -126,11 +149,11 @@ static int	execute_pipeline(t_command *left, t_command *right)
 		{
 			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "dup2 failed: %s\n", strerror(errno));
 			close(pipe_fd[1]);
-			exit(1);
+			_exit(1);
 		}
 		close(pipe_fd[1]);					/* Close write end after dup2 */
 		execute_command(left);				/* Execute left command */
-		exit(exit_value(0, GET));
+		_exit(exit_value(0, GET));
 	}
 
 	/* Execute right command */
@@ -154,11 +177,11 @@ static int	execute_pipeline(t_command *left, t_command *right)
 		{
 			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "dup2 failed: %s\n", strerror(errno));
 			close(pipe_fd[0]);
-			exit(1);
+			_exit(1);
 		}
 		close(pipe_fd[0]);					/* Close read end after dup2 */
 		execute_command(right);				/* Execute right command */
-		exit(exit_value(0, GET));
+		_exit(exit_value(0, GET));
 	}
 
 	/* Parent process: close pipe and wait for children */

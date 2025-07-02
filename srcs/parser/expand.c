@@ -17,7 +17,12 @@ static char	*get_env_value(const char *var_name)
 	while (env_list)
 	{
 		if (ft_strcmp(env_list->key, var_name) == 0)
-			return (env_list->value ? ft_strdup(env_list->value) : ft_strdup(""));
+		{
+			if (env_list->value)
+				return (ft_strdup(env_list->value));
+			else
+				return (ft_strdup(""));
+		}
 		env_list = env_list->next;
 	}
 	return (ft_strdup(""));
@@ -337,8 +342,15 @@ char	*expand_word(const char *word)
 	if (!word)
 		return (NULL);
 	
-	has_single = (ft_strchr(word, '\'') != NULL);
-	has_double = (ft_strchr(word, '"') != NULL);
+	if (ft_strchr(word, '\'') != NULL)
+		has_single = 1;
+	else
+		has_single = 0;
+	
+	if (ft_strchr(word, '"') != NULL)
+		has_double = 1;
+	else
+		has_double = 0;
 	
 	/* Check for mixed quotes */
 	if (has_single && has_double)
@@ -358,7 +370,13 @@ int	should_expand_in_context(const char *word)
 		return (0);
 	
 	/* Always process words with quotes or $ variables */
-	return (ft_strchr(word, '\'') != NULL || ft_strchr(word, '"') != NULL || ft_strchr(word, '$') != NULL);
+	if (ft_strchr(word, '\'') != NULL)
+		return (1);
+	if (ft_strchr(word, '"') != NULL)
+		return (1);
+	if (ft_strchr(word, '$') != NULL)
+		return (1);
+	return (0);
 }
 
 /* Expand word list */

@@ -1,9 +1,9 @@
 .DS_Store
 .vscode
-*CLAUDE.md
-./*CLAUDE.md
-./*/*CLAUDE.md
-./*/*/CLAUDE.md
+*CLAUDE*
+./*CLAUDE*
+./*/*CLAUDE*
+./*/*/CLAUDE*
 subject.md
 *.o
 *.d

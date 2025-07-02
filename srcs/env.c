@@ -76,9 +76,9 @@ void	show_env_list(t_env *env_list)
 	{
 		if (env_list->key)
 		{
-			ft_dprintf(STDOUT_FILENO, "%s", env_list->key);
+			ft_dprintf(STDOUT_FILENO, "declare -x %s", env_list->key);
 			if (env_list->value)
-				ft_dprintf(STDOUT_FILENO, "=%s", env_list->value);
+				ft_dprintf(STDOUT_FILENO, "=\"%s\"", env_list->value);
 			ft_dprintf(STDOUT_FILENO, "\n");
 		}
 		env_list = env_list->next;

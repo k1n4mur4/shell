@@ -6,7 +6,8 @@ int	exit_value(int exit_value, enum e_type type)
 
 	if (type == SET)
 	{
-		last_command_exit_value = exit_value;
+		/* Ensure exit value is in valid range (0-255) for bash compatibility */
+		last_command_exit_value = exit_value & 255;
 	}
 	else if (type == GET)
 	{
