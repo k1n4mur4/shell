@@ -112,39 +112,55 @@ static char	*append_string(char *base, char *append)
 	return (new_str);
 }
 
-/* Extract complete word including consecutive quotes and regular chars */
-static char	*extract_complete_word(const char **input)
+/* Initialize empty result string for word extraction */
+static char	*init_word_result(void)
 {
 	char	*result;
-	char	*part;
-	char	*tmp;
 
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
-	while (**input && is_word_char(**input))
+	return (result);
+}
+
+/* Process a single part of a word (quoted or unquoted) */
+static char	*process_word_part(const char **input, char *result)
+{
+	char	*part;
+	char	*tmp;
+
+	if (**input == '\'' || **input == '"')
+		part = extract_quoted_string(input, **input);
+	else
+		part = extract_word(input);
+	if (!part)
 	{
-		if (**input == '\'' || **input == '"')
-			part = extract_quoted_string(input, **input);
-		else
-			part = extract_word(input);
-		if (!part)
+		if (result[0] == '\0')
 		{
-			if (result[0] == '\0')
-			{
-				free(result);
-				return (NULL);
-			}
-			break ;
-		}
-		tmp = append_string(result, part);
-		free(result);
-		free(part);
-		if (!tmp)
-		{
+			free(result);
 			return (NULL);
 		}
-		result = tmp;
+		return (result);
+	}
+	tmp = append_string(result, part);
+	free(result);
+	free(part);
+	return (tmp);
+}
+
+/* Extract complete word including consecutive quotes and regular chars */
+static char	*extract_complete_word(const char **input)
+{
+	char	*result;
+
+	result = init_word_result();
+	if (!result)
+		return (NULL);
+	while (**input && is_word_char(**input))
+	{
+		result = process_word_part(input, result);
+		if (!result)
+			return (NULL);
 	}
 	if (result && result[0] == '\0')
 	{
@@ -166,22 +182,18 @@ static char	*get_next_token(const char **input)
 		return (extract_complete_word(input));
 }
 
-/* Pre-validate input for syntax errors */
-static int	validate_input(const char *input)
+/* Update quote state based on current character */
+static void	update_quote_state(char c, int *in_squote, int *in_dquote)
 {
-	int		in_squote;
-	int		in_dquote;
+	if (c == '\'' && !*in_dquote)
+		*in_squote = !*in_squote;
+	else if (c == '"' && !*in_squote)
+		*in_dquote = !*in_dquote;
+}
 
-	in_squote = 0;
-	in_dquote = 0;
-	while (*input)
-	{
-		if (*input == '\'' && !in_dquote)
-			in_squote = !in_squote;
-		else if (*input == '"' && !in_squote)
-			in_dquote = !in_dquote;
-		input++;
-	}
+/* Check for unclosed quotes and report errors */
+static int	check_quote_errors(int in_squote, int in_dquote)
+{
 	if (in_squote)
 	{
 		parser_error(NULL, ERROR_SYNTAX, '\'');
@@ -195,12 +207,51 @@ static int	validate_input(const char *input)
 	return (1);
 }
 
+/* Pre-validate input for syntax errors */
+static int	validate_input(const char *input)
+{
+	int		in_squote;
+	int		in_dquote;
+
+	in_squote = 0;
+	in_dquote = 0;
+	while (*input)
+	{
+		update_quote_state(*input, &in_squote, &in_dquote);
+		input++;
+	}
+	return (check_quote_errors(in_squote, in_dquote));
+}
+
+/* Process a single token and add it to the word list */
+static t_word_list	*process_single_token(const char **current, t_word_list *word_list)
+{
+	t_word_desc	*word_desc;
+	char		*token;
+
+	token = get_next_token(current);
+	if (!token)
+		return (word_list);
+	word_desc = make_word(token);
+	free(token);
+	if (!word_desc)
+	{
+		dispose_words(word_list);
+		return (NULL);
+	}
+	word_list = make_word_list(word_desc, word_list);
+	if (!word_list)
+	{
+		dispose_word(word_desc);
+		return (NULL);
+	}
+	return (word_list);
+}
+
 /* Main lexer function - tokenize input string into word list */
 t_word_list	*lexer_tokenize(const char *input)
 {
 	t_word_list	*word_list;
-	t_word_desc	*word_desc;
-	char		*token;
 	const char	*current;
 
 	if (!input)
@@ -211,22 +262,11 @@ t_word_list	*lexer_tokenize(const char *input)
 	current = input;
 	while (*current)
 	{
-		token = get_next_token(&current);
-		if (!token)
+		word_list = process_single_token(&current, word_list);
+		if (!word_list && *current)
+			return (NULL);
+		if (!*current)
 			break ;
-		word_desc = make_word(token);
-		free(token);
-		if (!word_desc)
-		{
-			dispose_words(word_list);
-			return (NULL);
-		}
-		word_list = make_word_list(word_desc, word_list);
-		if (!word_list)
-		{
-			dispose_word(word_desc);
-			return (NULL);
-		}
 	}
 	return (word_list);
 }
