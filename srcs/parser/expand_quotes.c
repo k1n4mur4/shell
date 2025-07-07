@@ -215,6 +215,11 @@ char	*expand_mixed_quotes(const char *word)
 			ft_strlcpy(part, &word[start], i - start + 1);
 			temp = expand_single_quoted(part);
 			free(part);
+			if (!temp)
+			{
+				free(result);
+				return (NULL);
+			}
 		}
 		else if (word[i] == '"')
 		{
@@ -232,6 +237,11 @@ char	*expand_mixed_quotes(const char *word)
 			ft_strlcpy(part, &word[start], i - start + 1);
 			temp = expand_double_quoted(part);
 			free(part);
+			if (!temp)
+			{
+				free(result);
+				return (NULL);
+			}
 		}
 		else
 		{
@@ -246,16 +256,18 @@ char	*expand_mixed_quotes(const char *word)
 			ft_strlcpy(part, &word[start], i - start + 1);
 			temp = expand_unquoted(part);
 			free(part);
-		}
-		if (temp)
-		{
-			char *new_result = ft_strjoin(result, temp);
-			free(result);
-			free(temp);
-			result = new_result;
-			if (!result)
+			if (!temp)
+			{
+				free(result);
 				return (NULL);
+			}
 		}
+		char *new_result = ft_strjoin(result, temp);
+		free(result);
+		free(temp);
+		result = new_result;
+		if (!result)
+			return (NULL);
 	}
 	return (result);
 }

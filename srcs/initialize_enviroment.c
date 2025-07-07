@@ -49,6 +49,12 @@ t_env	*initialize_env(char *envp)
 		return (NULL);
 	}
 	new = make_env_list(key, value);
+	if (!new)
+	{
+		free(key);
+		free(value);
+		return (NULL);
+	}
 	return (new);
 }
 

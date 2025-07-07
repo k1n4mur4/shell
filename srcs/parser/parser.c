@@ -329,6 +329,8 @@ void	parser(t_command *command)
 		dispose_ast_command(ast);
 	}
 	else
+	{
 		/* ft_dprintf(STDOUT_FILENO, "Failed to create AST\n"); */
+	}
 	dispose_words(word_list);
 }

@@ -239,11 +239,15 @@ static t_word_list	*process_single_token(const char **current, t_word_list *word
 		dispose_words(word_list);
 		return (NULL);
 	}
-	word_list = make_word_list(word_desc, word_list);
-	if (!word_list)
 	{
-		dispose_word(word_desc);
-		return (NULL);
+		t_word_list *new_word_list = make_word_list(word_desc, word_list);
+		if (!new_word_list)
+		{
+			dispose_word(word_desc);
+			dispose_words(word_list);
+			return (NULL);
+		}
+		word_list = new_word_list;
 	}
 	return (word_list);
 }

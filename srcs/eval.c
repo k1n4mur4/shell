@@ -1,5 +1,6 @@
 #include "eval.h"
 #include "signal_handler.h"
+#include "make_cmd.h"
 
 /* Shell termination flag management */
 static int	g_shell_exit_flag = 0;
@@ -37,8 +38,7 @@ int	reader_loop(void)
 		/* Check for exit flag before reading new command */
 		if (should_shell_exit())
 			break ;
-			
-		command.current_command = readline(ft_strjoin(ENAME, "$ "));
+		command.current_command = readline(PROMPT);
 		/* Ctrl+D（EOF）を処理 - ユーザーが終了を要求 */
 		if (!command.current_command)
 		{
@@ -55,7 +55,7 @@ int	reader_loop(void)
 		set_deftext(command.current_command);  /* 履歴に追加 */
 		parser(&command);                      /* ASTに解析 */
 		execute_command(&command);             /* 解析されたコマンドを実行 */
-		dispose_command(&command);             /* メモリをクリーンアップ */
+		dispose_current_command(&command);     /* current_commandをクリーンアップ */
 	}
 	return (exit_value(0, GET));
 }

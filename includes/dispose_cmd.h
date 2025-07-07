@@ -4,6 +4,6 @@
 #include <stdlib.h>
 #include "command.h"
 
-void	dispose_command(t_command	*command);
+void	dispose_current_command(t_command	*command);
 
 #endif

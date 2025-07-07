@@ -5,6 +5,8 @@
 
 #define ENAME	"minishell"
 
+#define	PROMPT	ENAME "$ "
+
 /* Error message prefixes */
 #define ERROR_PREFIX		ENAME ": "
 #define ERROR_SYNTAX_PREFIX	ENAME ": syntax error: "
