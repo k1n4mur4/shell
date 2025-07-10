@@ -10,8 +10,8 @@
 #include <string.h>
 
 /* Process execution functions */
-int		execute_external_command(const char *command_path, t_word_list *args);
-char	**create_argv_array(const char *command_path, t_word_list *args);
+int		execute_external_command(const char *command_path, const char *command_name, t_word_list *args);
+char	**create_argv_array(const char *command_path, const char *command_name, t_word_list *args);
 char	**create_envp_array(void);
 int		wait_for_child_process(pid_t pid);
 

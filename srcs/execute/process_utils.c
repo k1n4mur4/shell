@@ -17,7 +17,7 @@ int	count_word_list(t_word_list *list)
 }
 
 /* Create argv array from command path and arguments */
-char	**create_argv_array(const char *command_path, t_word_list *args)
+char	**create_argv_array(const char *command_path, const char *command_name, t_word_list *args)
 {
 	char		**argv;
 	int			argc;
@@ -32,8 +32,8 @@ char	**create_argv_array(const char *command_path, t_word_list *args)
 	if (!argv)
 		return (NULL);
 	
-	/* Set command as argv[0] */
-	argv[0] = ft_strdup(command_path);
+	/* Set command as argv[0] - use command name instead of full path */
+	argv[0] = ft_strdup(command_name);
 	if (!argv[0])
 	{
 		free(argv);
@@ -122,7 +122,6 @@ char	**create_envp_array(void)
 		}
 		env_list = env_list->next;
 	}
-	
 	envp[i] = NULL;
 	return (envp);
 }
@@ -186,7 +185,7 @@ int	wait_for_child_process(pid_t pid)
 }
 
 /* Execute external command with fork/exec */
-int	execute_external_command(const char *command_path, t_word_list *args)
+int	execute_external_command(const char *command_path, const char *command_name, t_word_list *args)
 {
 	pid_t	pid;
 	char	**argv;
@@ -196,7 +195,7 @@ int	execute_external_command(const char *command_path, t_word_list *args)
 	if (!command_path)
 		return (127);
 	
-	argv = create_argv_array(command_path, args);
+	argv = create_argv_array(command_path, command_name, args);
 	if (!argv)
 		return (1);
 	
@@ -222,15 +221,15 @@ int	execute_external_command(const char *command_path, t_word_list *args)
 		
 		if (execve(command_path, argv, envp) == -1)
 		{
-			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_path, strerror(errno));
+			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_name, strerror(errno));
 			free_argv_array(argv);
 			free_envp_array(envp);
 			
 			/* Return appropriate exit code based on errno */
 			if (errno == EACCES)
-				_exit(126);  /* Permission denied */
+				exit(126);  /* Permission denied */
 			else
-				_exit(127);  /* Command not found or other error */
+				exit(127);  /* Command not found or other error */
 		}
 	}
 	else

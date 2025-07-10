@@ -5,6 +5,7 @@
 ./*/*CLAUDE*
 ./*/*/CLAUDE*
 subject.md
+*.md
 *.o
 *.d
 *.a
