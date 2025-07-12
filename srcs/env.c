@@ -33,9 +33,9 @@ void	add_env_value(t_env *env, t_env *lst)
 
 	if (!env)
 		return ;
-	if (ft_strncmp(env->value, lst->value, ft_strlen(lst->value)) == 0)
-		return ;
-	value = ft_strjoin(env->value, lst->value);
+	// if (ft_strncmp(env->value, lst->value, ft_strlen(lst->value)) == 0)
+	// 	return ;
+	value = ft_strdup(lst->value);
 	free(env->value);
 	dispose_env(lst);
 	env->value = value;
