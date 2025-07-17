@@ -200,6 +200,14 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 
 	if (!tokens || !*tokens)
 		return (NULL);
+	
+	/* Check for standalone redirect operators at the beginning */
+	if (is_redirect_operator((*tokens)->word->word))
+	{
+		parser_error(NULL, ERROR_PARSE, (*tokens)->word->word);
+		return (NULL);
+	}
+	
 	words = NULL;
 	redirects = NULL;
 	while (*tokens)

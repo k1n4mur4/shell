@@ -2,6 +2,7 @@
 #include "signal_handler.h"
 #include "redirect_utils.h"
 #include "make_cmd.h"
+#include "exit_value.h"
 #include <unistd.h>
 
 /* Forward declaration */
@@ -20,6 +21,11 @@ static int	execute_single_command(char *trimmed)
 {
 	t_command	command;
 
+	/* Initialize command structure before use */
+	command.type = CM_SIMPLE;
+	command.simple = NULL;
+	command.left = NULL;
+	command.right = NULL;
 	command.current_command = ft_strdup(trimmed);
 	if (command.current_command)
 	{
@@ -59,8 +65,11 @@ static int	execute_command_parts(char *cmd_str, char delimiter)
 		if (*trimmed)
 		{
 			last_exit_code = process_command_part(trimmed, delimiter);
-			if (should_shell_exit())
+			if (shell_exit_status(0, GET) >= 0)
+			{
+				last_exit_code = shell_exit_status(0, GET);
 				break;
+			}
 		}
 		if (next_delim)
 			part = next_delim + 1;
@@ -99,39 +108,6 @@ static int	execute_command_string(const char *command_str)
 	return (last_exit_code);
 }
 
-/* Wrapper function to make get_next_line work like readline */
-static char	*my_readline(void)
-{
-	char	*line;
-	size_t	bytes_read;
-
-	line = NULL;
-	bytes_read = get_next_line(STDIN_FILENO, &line);
-	if (bytes_read > 0)
-		return (line);
-	if (line)
-		free(line);
-	return (NULL);
-}
-
-/* Process single line from stdin */
-static int	process_stdin_line(char *line)
-{
-	int	result;
-
-	if (line && ft_strlen(line) > 0 && 
-		line[ft_strlen(line) - 1] == '\n')
-		line[ft_strlen(line) - 1] = '\0';
-	if (line && *line)
-	{
-		result = execute_command_string(line);
-		if (should_shell_exit())
-			return (-1);
-		return (result);
-	}
-	return (0);
-}
-
 /* Execute commands from stdin (non-interactive mode) */
 static int	execute_stdin_commands(void)
 {
@@ -140,17 +116,23 @@ static int	execute_stdin_commands(void)
 	int		result;
 
 	last_exit_code = 0;
-	while ((line = my_readline()) != NULL)
+	line = readline("");
+	while (line != NULL)
 	{
-		result = process_stdin_line(line);
-		if (result == -1)
+		if (line && *line)
 		{
-			free(line);
-			break;
+			result = execute_command_string(line);
+			if (shell_exit_status(0, GET) >= 0)
+			{
+				last_exit_code = shell_exit_status(0, GET);
+				free(line);
+				break;
+			}
+			if (result != 0)
+				last_exit_code = result;
 		}
-		if (result != 0)
-			last_exit_code = result;
 		free(line);
+		line = readline("");
 	}
 	return (last_exit_code);
 }
@@ -161,24 +143,10 @@ static int	handle_command_option(char **argv, char **envp)
 	int	result;
 
 	initialize_enviroment(envp);
-	init_temp_file_cleanup();
 	shell_initialize();
 	result = execute_command_string(argv[2]);
 	exit_shell();
 	return (result);
-}
-
-/* Initialize and run interactive shell */
-static void	run_shell_main(char **envp)
-{
-	initialize_enviroment(envp);
-	init_temp_file_cleanup();
-	shell_initialize();
-	if (isatty(STDIN_FILENO))
-		reader_loop();
-	else
-		execute_stdin_commands();
-	exit_shell();
 }
 
 int	shell(int argc, char **argv, char **envp)
@@ -191,6 +159,12 @@ int	shell(int argc, char **argv, char **envp)
 			"%s: %s: No such file or directory\n", ENAME, argv[1]);
 		return (127);
 	}
-	run_shell_main(envp);
+	initialize_enviroment(envp);
+	shell_initialize();
+	if (isatty(STDIN_FILENO))
+		reader_loop();
+	else
+		execute_stdin_commands();
+	exit_shell();
 	return (exit_value(0, GET));
 }

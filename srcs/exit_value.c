@@ -15,3 +15,25 @@ int	exit_value(int exit_value, enum e_type type)
 	}
 	return (exit_value);
 }
+
+int	shell_exit_status(int exit_code, enum e_type type)
+{
+	static int	exit_code_value = 0;
+	static int	should_exit = 0;
+
+	if (type == SET)
+	{
+		exit_code_value = exit_code & 255;
+		should_exit = 1;
+	}
+	else if (type == GET)
+	{
+		if (should_exit)
+		{
+			should_exit = 0;
+			return (exit_code_value);
+		}
+		return (-1);
+	}
+	return (exit_code_value);
+}

@@ -1,19 +1,7 @@
 #include "eval.h"
 #include "signal_handler.h"
 #include "make_cmd.h"
-
-/* Shell termination flag management */
-static int	g_shell_exit_flag = 0;
-
-void	set_shell_exit_flag(int flag)
-{
-	g_shell_exit_flag = flag;
-}
-
-int	should_shell_exit(void)
-{
-	return (g_shell_exit_flag);
-}
+#include "exit_value.h"
 
 /*
  * minishellのメインREPL（Read-Eval-Print Loop）
@@ -35,9 +23,11 @@ int	reader_loop(void)
 	set_signal();
 	while (1)
 	{
-		/* Check for exit flag before reading new command */
-		if (should_shell_exit())
-			break ;
+		/* Initialize command structure before use */
+		command.type = CM_SIMPLE;
+		command.simple = NULL;
+		command.left = NULL;
+		command.right = NULL;
 		command.current_command = readline(PROMPT);
 		/* Ctrl+D（EOF）を処理 - ユーザーが終了を要求 */
 		if (!command.current_command)
@@ -56,6 +46,12 @@ int	reader_loop(void)
 		parser(&command);                      /* ASTに解析 */
 		execute_command(&command);             /* 解析されたコマンドを実行 */
 		dispose_current_command(&command);     /* current_commandをクリーンアップ */
+		
+		/* Check if exit command was executed */
+		if (shell_exit_status(0, GET) >= 0)  /* Shell exit requested */
+		{
+			return (shell_exit_status(0, GET));
+		}
 	}
 	return (exit_value(0, GET));
 }

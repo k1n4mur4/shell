@@ -1,5 +1,6 @@
 #include "builtin.h"
 #include "eval.h"
+#include "exit_value.h"
 
 static int	is_valid_number(const char *str)
 {
@@ -53,8 +54,7 @@ int	builtin_exit(t_word_list *args)
 		}
 	}
 	
-	exit_value(exit_code, SET);
-	set_shell_exit_flag(1);
+	shell_exit_status(exit_code, SET);  /* Set shell exit status */
 	
 	return (exit_code);
 }

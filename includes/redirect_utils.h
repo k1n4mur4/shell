@@ -41,13 +41,6 @@ void				print_redirect_error(const char *filename, const char *error_msg);
 
 /* Temporary file functions for heredoc */
 char				*create_temp_file(void);
-int					write_heredoc_to_temp(const char *delimiter, const char *temp_filename);
 void				cleanup_temp_file(const char *temp_filename);
-
-/* Temporary file list management */
-void				add_temp_file(const char *filename);
-void				remove_temp_file(const char *filename);
-void				cleanup_all_temp_files(void);
-void				init_temp_file_cleanup(void);
 
 #endif
