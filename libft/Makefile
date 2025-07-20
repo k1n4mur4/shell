@@ -102,6 +102,7 @@ STRING_SRCS	=	$(STRING_DIR)/ft_split.c \
 				$(STRING_DIR)/ft_strlen.c \
 				$(STRING_DIR)/ft_strmapi.c \
 				$(STRING_DIR)/ft_strncmp.c \
+				$(STRING_DIR)/ft_strndup.c \
 				$(STRING_DIR)/ft_strnstr.c \
 				$(STRING_DIR)/ft_strrchr.c \
 				$(STRING_DIR)/ft_strtrim.c \
