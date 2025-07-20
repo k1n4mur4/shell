@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kinamura <kinamura@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 13:45:34 by kinamura          #+#    #+#             */
-/*   Updated: 2025/05/06 01:53:40 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/20 03:11:37 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 # include <fcntl.h>
 # include <stdio.h>
 # include "get_next_line.h"
+
+# define SUFFIX_TEMP	"XXXXXX"
 
 typedef struct s_list
 {
@@ -77,16 +79,16 @@ long				ft_atol(const char *str);
 void				*ft_calloc(size_t count, size_t size);
 int					ft_hextoi(int c);
 char				*ft_itoa(int n);
+int					ft_mkstemp(char *template);
+char				*ft_mktemp(char *template);
+long				ft_random(void);
 long				ft_strtol(const char *str, char **endptr, int base);
 void				ft_swap(int *a, int *b);
 // string
-char				**ft_append(char ***basic_str, char *str);
-char				**ft_arrayncpy(char **str, int n);
 char				**ft_split(char const *s, char c);
 char				*ft_strchr(const char *s, int c);
 int					ft_strcmp(const char *s1, const char *s2);
 char				*ft_strdup(const char *s1);
-char 				*ft_strndup(const char *s, size_t n);
 void				ft_striteri(char *s, void (*f)(unsigned int, char *));
 char				*ft_strjoin(char const *s1, char const *s2);
 size_t				ft_strlcat(char *dst, const char *src, size_t dstsize);

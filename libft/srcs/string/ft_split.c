@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stakada <stakada@student.42tokyo.jp>       +#+  +:+       +#+        */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 23:39:24 by kinamura          #+#    #+#             */
-/*   Updated: 2025/01/21 03:56:51 by stakada          ###   ########.fr       */
+/*   Updated: 2025/07/20 03:04:05 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,26 @@ static int	count_words(char const *str, char c)
 		index++;
 	}
 	return (count);
+}
+
+static char	*ft_strndup(const char *str, size_t len)
+{
+	char	*word;
+	size_t	index;
+
+	if (!len)
+		return (NULL);
+	word = (char *)malloc(sizeof(char) * (len + 1));
+	if (!word)
+		return (NULL);
+	index = 0;
+	while (str[index] && index < len)
+	{
+		word[index] = str[index];
+		index++;
+	}
+	word[len] = '\0';
+	return (word);
 }
 
 static char	**ft_separate(const char *s, char c, char **result, size_t *count)

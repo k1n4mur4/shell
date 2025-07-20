@@ -46,7 +46,7 @@ else
 	LDFLAGS		+=	-L/usr/lib
 endif
 
-INCLUDES		+=	-I $(LIBFT_DIR)/includes/$(OS)
+INCLUDES		+=	-I $(LIBFT_DIR)/$(OS)/includes
 SRCS			+=	$(OS_SRCS)
 
 # Colors

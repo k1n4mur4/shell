@@ -4,20 +4,19 @@ CFLAGS		=	-Wall -Wextra -Werror
 RM			=	rm -rf
 AR			=	ar rcs
 
-SRCS_DIR	=	./srcs
+SRCS_DIR    =	./srcs
 
-OBJS_DIR	=	./objs
-
-UNAME_S		=	$(shell uname -s)
+# OS Libft
+UNAME_S     = $(shell uname -s)
 ifeq ($(UNAME_S), Darwin)
-	OS		=	mac
+    OS_DIR  = ./mac
 else
-	OS		=	linux
+    OS_DIR  = ./linux
 endif
 
-INCLUDES	=	-I ./includes -I ./includes/$(OS)
+INCLUDES	=	-I ./includes -I $(OS_DIR)/includes
 
-OS_SRCS_DIR	=	$(SRCS_DIR)/$(OS)
+OS_SRCS_DIR	=	$(OS_DIR)/srcs
 PRINTF_DIR	=	$(OS_SRCS_DIR)/ft_printf
 PRINTF_SRCS	=	$(PRINTF_DIR)/ft_dprintf.c \
 				$(PRINTF_DIR)/ft_fputc.c \
@@ -34,6 +33,7 @@ PRINTF_SRCS	=	$(PRINTF_DIR)/ft_dprintf.c \
 
 OS_SRCS		=	$(PRINTF_SRCS)
 
+# common Libft
 CTYPE_DIR	=	$(SRCS_DIR)/ctype
 FREE_DIR	=	$(SRCS_DIR)/free
 GNL_DIR		=	$(SRCS_DIR)/get_next_line
@@ -86,13 +86,15 @@ STDLIB_SRCS	=	$(STDLIB_DIR)/ft_atoi.c \
 				$(STDLIB_DIR)/ft_calloc.c \
 				$(STDLIB_DIR)/ft_hextoi.c \
 				$(STDLIB_DIR)/ft_itoa.c \
+				$(STDLIB_DIR)/ft_mkstemp.c \
+				$(STDLIB_DIR)/ft_mktemp.c \
+				$(STDLIB_DIR)/ft_random.c \
 				$(STDLIB_DIR)/ft_strtol.c \
 				$(STDLIB_DIR)/ft_swap.c
 STRING_SRCS	=	$(STRING_DIR)/ft_split.c \
 				$(STRING_DIR)/ft_strchr.c \
 				$(STRING_DIR)/ft_strcmp.c \
 				$(STRING_DIR)/ft_strdup.c \
-				$(STRING_DIR)/ft_strndup.c \
 				$(STRING_DIR)/ft_striteri.c \
 				$(STRING_DIR)/ft_strjoin.c \
 				$(STRING_DIR)/ft_strlcat.c \
@@ -107,45 +109,43 @@ STRING_SRCS	=	$(STRING_DIR)/ft_split.c \
 
 SRCS		=	$(OS_SRCS) $(CTYPE_SRCS) $(FREE_SRCS) $(GNL_SRCS) $(LIST_SRCS) $(MATH_SRCS) $(MEM_SRCS) \
 				$(STDIO_SRCS) $(STDLIB_SRCS) $(STRING_SRCS)
-
-OBJS		=	$(SRCS:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)
+OBJS		=	$(SRCS:.c=.o)
 
 RESET		=	\033[0m
 BOLD		=	\033[1m
 LIGHT_BLUE	=	\033[94m
 YELLOW		=	\033[93m
 
-# Progress Bar
-TOTAL_FILES	:=	$(words $(OBJS))
-COMPILED	=	0
+TOTAL_FILES := $(words $(OBJS))
+CURRENT_FILE := 0
 
 define progress
-	@$(eval COMPILED=$(shell echo $$(expr $(COMPILED) + 1)))
-	@CURRENT_PERCENT=$$(expr $(COMPILED) \* 100 / $(TOTAL_FILES)); \
-	printf "\033[K$(YELLOW)[%3d%%] Libft Compiling: $<$(RESET)\r" $$CURRENT_PERCENT
+    @CURRENT_PERCENT=$$(expr $(CURRENT_FILE) \* 100 / $(TOTAL_FILES)); \
+    printf "$(YELLOW)Progress: %3d%% (%d/%d)$(RESET)\r" $$CURRENT_PERCENT $(CURRENT_FILE) $(TOTAL_FILES); \
+    $(eval CURRENT_FILE=$$(($(CURRENT_FILE)+1)))
 endef
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	@printf "\033[K$(BOLD)$(LIGHT_BLUE)Compiling $(NAME)...$(RESET)"
 	@$(AR) $(NAME) $(OBJS)
-	@printf "\r\033[K$(BOLD)$(LIGHT_BLUE)$(NAME) created successfully!$(RESET)\n"
+	@echo "$(BOLD)$(LIGHT_BLUE)$(NAME) created successfully!$(RESET)"
 
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c
-	@mkdir -p $(dir $@)
-	@$(progress)
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+%.o: %.c
+	@$(eval CURRENT_FILE=$(shell expr $(CURRENT_FILE) + 1))
+	@CURRENT_PERCENT=$$(expr $(CURRENT_FILE) \* 100 / $(TOTAL_FILES)); \
+	printf "$(YELLOW)Progress: %3d%% (%d/%d)$(RESET)\r" $$CURRENT_PERCENT $(CURRENT_FILE) $(TOTAL_FILES); \
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	@printf "\033[K$(BOLD)$(LIGHT_BLUE)Cleaning object files...$(RESET)"
-	@$(RM) $(OBJS_DIR)
-	@printf "\r\033[K$(BOLD)$(LIGHT_BLUE)Libft cleaned!$(RESET)\n"
+	@echo "$(BOLD)$(LIGHT_BLUE)Cleaning objects...$(RESET)"
+	@$(RM) $(OBJS)
+	@echo "$(BOLD)$(LIGHT_BLUE)Cleaning Complete!$(RESET)"
 
 fclean:
-	@printf "\033[K$(BOLD)$(LIGHT_BLUE)Removing $(NAME)...$(RESET)"
-	@$(RM) $(OBJS_DIR) $(NAME)
-	@printf "\r\033[K$(BOLD)$(LIGHT_BLUE)Libft Full clean complete!$(RESET)\n"
+	@echo "$(BOLD)$(LIGHT_BLUE)Cleaning $(NAME)...$(RESET)"
+	@$(RM) $(OBJS) $(NAME)
+	@echo "$(BOLD)$(LIGHT_BLUE)Cleaning $(NAME) Complete!$(RESET)"
 
 re: fclean all
 
