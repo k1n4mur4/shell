@@ -1,5 +1,17 @@
-#include "parser.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lexer.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:38 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:38 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "error.h"
+#include "parser.h"
 
 /* Check if character is whitespace */
 static int	is_whitespace(char c)
@@ -74,8 +86,8 @@ static char	*extract_word(const char **input)
 	int			len;
 
 	start = *input;
-	while (**input && !is_whitespace(**input) && 
-		   !is_operator_char(**input) && **input != '\'' && **input != '"')
+	while (**input && !is_whitespace(**input) &&
+			!is_operator_char(**input) && **input != '\'' && **input != '"')
 		(*input)++;
 	len = *input - start;
 	result = ft_calloc(len + 1, sizeof(char));
@@ -210,8 +222,8 @@ static int	check_quote_errors(int in_squote, int in_dquote)
 /* Pre-validate input for syntax errors */
 static int	validate_input(const char *input)
 {
-	int		in_squote;
-	int		in_dquote;
+	int	in_squote;
+	int	in_dquote;
 
 	in_squote = 0;
 	in_dquote = 0;
@@ -224,10 +236,12 @@ static int	validate_input(const char *input)
 }
 
 /* Process a single token and add it to the word list */
-static t_word_list	*process_single_token(const char **current, t_word_list *word_list)
+static t_word_list	*process_single_token(const char **current,
+											t_word_list *word_list)
 {
 	t_word_desc	*word_desc;
 	char		*token;
+	t_word_list	*new_word_list;
 
 	token = get_next_token(current);
 	if (!token)
@@ -240,7 +254,7 @@ static t_word_list	*process_single_token(const char **current, t_word_list *word
 		return (NULL);
 	}
 	{
-		t_word_list *new_word_list = make_word_list(word_desc, word_list);
+		new_word_list = make_word_list(word_desc, word_list);
 		if (!new_word_list)
 		{
 			dispose_word(word_desc);
@@ -255,8 +269,8 @@ static t_word_list	*process_single_token(const char **current, t_word_list *word
 /* Main lexer function - tokenize input string into word list */
 t_word_list	*lexer_tokenize(const char *input)
 {
-	t_word_list	*word_list;
-	const char	*current;
+	t_word_list *word_list;
+	const char *current;
 
 	if (!input)
 		return (NULL);

@@ -14,9 +14,9 @@
 
 static void	set_suffix(char *suffix)
 {
-	size_t				len;
-	size_t				i;
-	unsigned int		r;
+	size_t			len;
+	size_t			i;
+	unsigned int	r;
 
 	len = ft_strlen(suffix);
 	i = 0;

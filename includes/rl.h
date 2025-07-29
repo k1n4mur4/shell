@@ -1,8 +1,20 @@
-#ifndef	RL_H
-#define	RL_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rl.h                                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:37:16 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:37:16 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <stdio.h>
-#include <readline/history.h>
+#ifndef RL_H
+# define RL_H
+
+# include <readline/history.h>
+# include <stdio.h>
 
 void	set_deftext(char *deftext);
 

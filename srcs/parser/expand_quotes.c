@@ -1,6 +1,18 @@
-#include "parser.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   expand_quotes.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:32 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:33 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "env.h"
 #include "eval.h"
+#include "parser.h"
 
 char	*expand_single_quoted(const char *word)
 {
@@ -36,6 +48,7 @@ char	*expand_double_quoted(const char *word)
 	int		i;
 	int		start;
 	int		advance;
+	char	*substr;
 
 	result = ft_strdup("");
 	if (!result)
@@ -46,7 +59,7 @@ char	*expand_double_quoted(const char *word)
 		if (word[i] == '"')
 		{
 			i++;
-			continue;
+			continue ;
 		}
 		if (word[i] == '$' && word[i + 1])
 		{
@@ -89,7 +102,7 @@ char	*expand_double_quoted(const char *word)
 				i++;
 			if (i > start)
 			{
-				char *substr = ft_calloc(i - start + 1, sizeof(char));
+				substr = ft_calloc(i - start + 1, sizeof(char));
 				if (!substr)
 				{
 					free(result);
@@ -117,6 +130,7 @@ char	*expand_unquoted(const char *word)
 	int		i;
 	int		start;
 	int		advance;
+	char	*substr;
 
 	result = ft_strdup("");
 	if (!result)
@@ -165,7 +179,7 @@ char	*expand_unquoted(const char *word)
 				i++;
 			if (i > start)
 			{
-				char *substr = ft_calloc(i - start + 1, sizeof(char));
+				substr = ft_calloc(i - start + 1, sizeof(char));
 				if (!substr)
 				{
 					free(result);
@@ -186,11 +200,11 @@ char	*expand_unquoted(const char *word)
 
 char	*expand_mixed_quotes(const char *word)
 {
-	char	*result;
-	char	*temp;
-	char	*part;
-	int		i;
-	int		start;
+	char *result;
+	char *temp;
+	char *part;
+	int i;
+	int start;
 
 	result = ft_strdup("");
 	if (!result)

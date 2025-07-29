@@ -1,25 +1,34 @@
-#include "parser.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   expand_ast.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:29 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:30 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "env.h"
 #include "eval.h"
+#include "parser.h"
 
 char	*expand_word(const char *word)
 {
-	int		has_single;
-	int		has_double;
+	int	has_single;
+	int	has_double;
 
 	if (!word)
 		return (NULL);
-	
 	if (ft_strchr(word, '\'') != NULL)
 		has_single = 1;
 	else
 		has_single = 0;
-	
 	if (ft_strchr(word, '"') != NULL)
 		has_double = 1;
 	else
 		has_double = 0;
-	
 	if (has_single && has_double)
 		return (expand_mixed_quotes(word));
 	else if (has_single)
@@ -34,7 +43,6 @@ int	should_expand_in_context(const char *word)
 {
 	if (!word)
 		return (0);
-	
 	if (ft_strchr(word, '\'') != NULL)
 		return (1);
 	if (ft_strchr(word, '"') != NULL)
@@ -52,7 +60,7 @@ static void	expand_word_list(t_word_list *words)
 	current = words;
 	while (current)
 	{
-		if (current->word && current->word->word && 
+		if (current->word && current->word->word &&
 			should_expand_in_context(current->word->word))
 		{
 			expanded = expand_word(current->word->word);
@@ -92,7 +100,7 @@ void	expand_ast(t_command *ast)
 {
 	if (!ast)
 		return ;
-	
+
 	if (ast->type == CM_SIMPLE && ast->simple)
 	{
 		if (ast->simple->words)
@@ -100,9 +108,15 @@ void	expand_ast(t_command *ast)
 		if (ast->simple->redirects)
 			expand_redirections(ast->simple->redirects);
 	}
-	else if (ast->type == CM_PIPE || ast->type == CM_AND || ast->type == CM_OR)
+	else if (ast->type == CM_PIPE)
 	{
 		expand_ast(ast->left);
 		expand_ast(ast->right);
+	}
+	else if (ast->type == CM_AND || ast->type == CM_OR)
+	{
+		/* For logical operators, only expand left side initially.
+			Right side will be expanded during execution if needed. */
+		expand_ast(ast->left);
 	}
 }

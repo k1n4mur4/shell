@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   path_utils.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:07 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:08 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "path_utils.h"
 
 /* Check if file is executable */
@@ -40,14 +52,14 @@ char	**get_path_dirs(void)
 /* Find command in PATH */
 char	*find_command_path(const char *command)
 {
-	char	**path_dirs;
-	char	*full_path;
-	char	*temp;
-	int		i;
+	char **path_dirs;
+	char *full_path;
+	char *temp;
+	int i;
 
 	if (!command)
 		return (NULL);
-	
+
 	/* If command contains '/', treat as absolute/relative path */
 	if (ft_strchr(command, '/'))
 	{
@@ -55,12 +67,12 @@ char	*find_command_path(const char *command)
 			return (ft_strdup(command));
 		return (NULL);
 	}
-	
+
 	/* Search in PATH directories */
 	path_dirs = get_path_dirs();
 	if (!path_dirs)
 		return (NULL);
-	
+
 	i = 0;
 	while (path_dirs[i])
 	{

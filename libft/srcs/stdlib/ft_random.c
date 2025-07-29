@@ -14,10 +14,11 @@
 
 long	ft_random(void)
 {
-	static long	temp = 0;
+	static long	temp;
 	int			stack;
 	long		rand;
 
+	temp = 0;
 	rand = 0;
 	temp += (long)&stack;
 	temp ^= temp << 5;

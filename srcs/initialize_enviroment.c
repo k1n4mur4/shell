@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   initialize_enviroment.c                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:49:30 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:49:31 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "env.h"
 
 t_env	*alloc_env(void)
@@ -29,7 +41,7 @@ t_env	*make_env_list(char *key, char *value)
 
 t_env	*initialize_env(char *envp)
 {
-	int	i;
+	int		i;
 	t_env	*new;
 	char	*key;
 	char	*value;
@@ -64,8 +76,9 @@ void	initialize_enviroment(char **envp)
 
 	if (!envp || !*envp)
 	{
-		/* Debug: ft_dprintf(STDERR_FILENO, "Warning: No environment variables found\n"); */
-		return;
+		/* Debug: ft_dprintf(STDERR_FILENO,
+				"Warning: No environment variables found\n"); */
+		return ;
 	}
 	count = 0;
 	env(initialize_env(*envp), SET);
@@ -77,5 +90,6 @@ void	initialize_enviroment(char **envp)
 		envp++;
 		count++;
 	}
-	/* Debug: ft_dprintf(STDERR_FILENO, "Initialized %d environment variables\n", count); */
+	/* Debug: ft_dprintf(STDERR_FILENO, "Initialized
+			%d environment variables\n", count); */
 }

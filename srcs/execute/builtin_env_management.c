@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   builtin_env_management.c                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:47:54 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:47:54 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "builtin.h"
 
 int	builtin_env(t_word_list *args)
@@ -6,15 +18,16 @@ int	builtin_env(t_word_list *args)
 
 	if (args)
 	{
-		ft_dprintf(STDERR_FILENO, "env: '%s': No such file or directory\n", args->word->word);
+		ft_dprintf(STDERR_FILENO, "env: '%s': No such file or directory\n",
+				args->word->word);
 		return (127);
 	}
-	
 	env_list = env(NULL, GET);
 	while (env_list)
 	{
 		if (env_list->key && env_list->value)
-			ft_dprintf(STDOUT_FILENO, "%s=%s\n", env_list->key, env_list->value);
+			ft_dprintf(STDOUT_FILENO, "%s=%s\n", env_list->key,
+					env_list->value);
 		env_list = env_list->next;
 	}
 	return (0);
@@ -38,14 +51,15 @@ int	builtin_export(t_word_list *args)
 	{
 		if (current->word && current->word->word)
 		{
-			if (!ft_isalpha(current->word->word[0]) && current->word->word[0] != '_')
+			if (!ft_isalpha(current->word->word[0])
+				&& current->word->word[0] != '_')
 			{
-				ft_dprintf(STDERR_FILENO, "minishell: export: `%s': not a valid identifier\n", 
-					current->word->word);
+				ft_dprintf(STDERR_FILENO,
+							"minishell: export: `%s': not a valid identifier\n",
+							current->word->word);
 				current = current->next;
-				continue;
+				continue ;
 			}
-			
 			equal_pos = ft_strchr(current->word->word, '=');
 			if (equal_pos)
 			{
@@ -103,10 +117,10 @@ int	builtin_export(t_word_list *args)
 
 int	builtin_unset(t_word_list *args)
 {
-	t_word_list	*current;
-	t_env		*env_list;
-	t_env		*prev;
-	t_env		*to_remove;
+	t_word_list *current;
+	t_env *env_list;
+	t_env *prev;
+	t_env *to_remove;
 
 	current = args;
 	while (current)

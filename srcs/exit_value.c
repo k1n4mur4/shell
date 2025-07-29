@@ -1,9 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exit_value.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:49:27 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:49:27 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "exit_value.h"
 
 int	exit_value(int exit_value, enum e_type type)
 {
-	static int	last_command_exit_value = 0;
+	static int	last_command_exit_value;
 
+	last_command_exit_value = 0;
 	if (type == SET)
 	{
 		/* Ensure exit value is in valid range (0-255) for bash compatibility */
@@ -18,9 +31,11 @@ int	exit_value(int exit_value, enum e_type type)
 
 int	shell_exit_status(int exit_code, enum e_type type)
 {
-	static int	exit_code_value = 0;
-	static int	should_exit = 0;
+	static int	exit_code_value;
+	static int	should_exit;
 
+	exit_code_value = 0;
+	should_exit = 0;
 	if (type == SET)
 	{
 		exit_code_value = exit_code & 255;

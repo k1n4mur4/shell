@@ -1,5 +1,17 @@
-#include "parser.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parser.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:47 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 02:06:22 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "error.h"
+#include "parser.h"
 
 /* Static function declarations */
 static t_command	*parse_pipeline(t_word_list **tokens);
@@ -17,8 +29,8 @@ void	print_word_list(t_word_list *list)
 	current = list;
 	while (current)
 	{
-		ft_dprintf(STDOUT_FILENO, "Word[%d]: '%s' (flags: 0x%x)\n", 
-			index++, current->word->word, current->word->flags);
+		ft_dprintf(STDOUT_FILENO, "Word[%d]: '%s' (flags: 0x%x)\n", index++,
+				current->word->word, current->word->flags);
 		current = current->next;
 	}
 }
@@ -26,7 +38,9 @@ void	print_word_list(t_word_list *list)
 /* Debug function to print AST */
 static void	print_ast(t_command *cmd, int depth)
 {
-	int	i;
+	int			i;
+	t_redirect	*redir;
+	t_word_list	*words;
 
 	if (!cmd)
 		return ;
@@ -38,8 +52,6 @@ static void	print_ast(t_command *cmd, int depth)
 	}
 	if (cmd->type == CM_SIMPLE)
 	{
-		t_redirect *redir;
-		t_word_list *words;
 		ft_dprintf(STDOUT_FILENO, "SIMPLE_CMD:");
 		if (cmd->simple && cmd->simple->words)
 		{
@@ -116,23 +128,21 @@ static t_command	*parse_and_or(t_word_list **tokens)
 {
 	t_command	*left;
 	t_command	*right;
+	int			is_and;
 
 	left = parse_pipeline(tokens);
 	if (!left)
 		return (NULL);
 	while (*tokens && ((*tokens)->word->flags & (W_AND | W_OR)))
 	{
-		int is_and = ((*tokens)->word->flags & W_AND);
+		is_and = ((*tokens)->word->flags & W_AND);
 		*tokens = (*tokens)->next;
-		
-		/* Check for missing command after &&/|| operator */
 		if (!*tokens)
 		{
 			parser_error(NULL, ERROR_PARSE, "\\n");
 			dispose_ast_command(left);
 			return (NULL);
 		}
-		
 		right = parse_pipeline(tokens);
 		if (!right)
 		{
@@ -164,7 +174,6 @@ static t_command	*parse_pipeline(t_word_list **tokens)
 	while (*tokens && ((*tokens)->word->flags & W_PIPE))
 	{
 		*tokens = (*tokens)->next;
-		
 		/* Check for missing command after pipe */
 		if (!*tokens)
 		{
@@ -172,7 +181,6 @@ static t_command	*parse_pipeline(t_word_list **tokens)
 			dispose_ast_command(left);
 			return (NULL);
 		}
-		
 		right = parse_simple_command(tokens);
 		if (!right)
 		{
@@ -192,22 +200,16 @@ static t_command	*parse_pipeline(t_word_list **tokens)
 /* Parse simple command with redirections */
 static t_command	*parse_simple_command(t_word_list **tokens)
 {
-	t_word_list	*words;
-	t_redirect	*redirects;
-	t_word_list	*current;
+	t_word_list		*words;
+	t_redirect		*redirects;
+	t_word_list		*current;
 	t_redirect_type	type;
-	t_redirect	*new_redirect;
+	t_redirect		*new_redirect;
+	t_word_desc		*word_copy;
 
 	if (!tokens || !*tokens)
 		return (NULL);
-	
-	/* Check for standalone redirect operators at the beginning */
-	if (is_redirect_operator((*tokens)->word->word))
-	{
-		parser_error(NULL, ERROR_PARSE, (*tokens)->word->word);
-		return (NULL);
-	}
-	
+	/* Allow standalone redirect operators - they form valid simple commands */
 	words = NULL;
 	redirects = NULL;
 	while (*tokens)
@@ -233,9 +235,7 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 				*tokens = (*tokens)->next;
 				continue ;
 			}
-			
 			*tokens = (*tokens)->next;
-			
 			/* Check for missing filename after redirection operator */
 			if (!*tokens || !(*tokens)->word)
 			{
@@ -244,18 +244,17 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 				dispose_redirects(redirects);
 				return (NULL);
 			}
-			
 			/* Check for invalid redirection target (operators) */
-			if (is_redirect_operator((*tokens)->word->word) || 
+			if (is_redirect_operator((*tokens)->word->word) ||
 				((*tokens)->word->flags & W_PIPE) ||
-				((*tokens)->word->word && ft_strcmp((*tokens)->word->word, "&&") == 0))
+				((*tokens)->word->word && ft_strcmp((*tokens)->word->word,
+							"&&") == 0))
 			{
 				parser_error(NULL, ERROR_PARSE, (*tokens)->word->word);
 				dispose_words(words);
 				dispose_redirects(redirects);
 				return (NULL);
 			}
-			
 			new_redirect = make_redirect(type, (*tokens)->word->word);
 			if (new_redirect)
 			{
@@ -266,7 +265,7 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 		}
 		else
 		{
-			t_word_desc *word_copy = copy_word_desc(current->word);
+			word_copy = copy_word_desc(current->word);
 			if (!word_copy)
 			{
 				dispose_words(words);
@@ -300,12 +299,15 @@ static int	is_redirect_operator(const char *token)
 /* Main parser function */
 void	parser(t_command *command)
 {
-	t_word_list	*word_list;
-	t_command	*ast;
+	t_word_list *word_list;
+	t_command *ast;
 
 	if (!command || !command->current_command)
 		return ;
-	/* ft_dprintf(STDOUT_FILENO, "Parsing: '%s'\n", command->current_command); */
+	command->type = CM_SIMPLE;
+	command->simple = NULL;
+	command->left = NULL;
+	command->right = NULL;
 	word_list = parse_command_line(command->current_command);
 	if (!word_list)
 	{
@@ -319,12 +321,12 @@ void	parser(t_command *command)
 	{
 		/* ft_dprintf(STDOUT_FILENO, "AST before expansion:\n");
 		print_ast(ast, 0); */
-		
+
 		expand_ast(ast);
-		
+
 		/* ft_dprintf(STDOUT_FILENO, "AST after expansion:\n");
 		print_ast(ast, 0); */
-		
+
 		/* Copy AST structure to command for execution */
 		command->type = ast->type;
 		command->simple = ast->simple;

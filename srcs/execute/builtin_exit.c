@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   builtin_exit.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:47:57 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 02:12:37 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "builtin.h"
 #include "eval.h"
 #include "exit_value.h"
@@ -8,14 +20,11 @@ static int	is_valid_number(const char *str)
 
 	if (!str || !str[0])
 		return (0);
-	
 	i = 0;
 	if (str[i] == '+' || str[i] == '-')
 		i++;
-	
 	if (!str[i])
 		return (0);
-	
 	while (str[i])
 	{
 		if (!ft_isdigit(str[i]))
@@ -31,20 +40,17 @@ int	builtin_exit(t_word_list *args)
 	long long	temp_code;
 
 	exit_code = 0;
-	ft_dprintf(STDOUT_FILENO, "exit\n");
-	
+	ft_fputs("exit\n", STDOUT_FILENO);
 	if (args && args->word && args->word->word)
 	{
 		if (args->next)
 		{
-			ft_dprintf(STDERR_FILENO, "minishell: exit: too many arguments\n");
+			ft_fputs("minishell: exit: too many arguments\n", STDERR_FILENO);
 			return (1);
 		}
-		
 		if (!is_valid_number(args->word->word))
 		{
-			ft_dprintf(STDERR_FILENO, "minishell: exit: %s: numeric argument required\n", 
-				args->word->word);
+			ft_dprintf(STDERR_FILENO, "minishell: exit: %s: numeric argument required\n", args->word->word);
 			exit_code = 2;
 		}
 		else
@@ -53,8 +59,6 @@ int	builtin_exit(t_word_list *args)
 			exit_code = (int)(temp_code & 255);
 		}
 	}
-	
-	shell_exit_status(exit_code, SET);  /* Set shell exit status */
-	
+	shell_exit_status(exit_code, SET);
 	return (exit_code);
 }

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   make_word.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:44 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:44 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "make_cmd.h"
 
 t_word_desc	*alloc_word_desc(void);
@@ -32,7 +44,6 @@ t_word_desc	*make_bare_word(const char *string)
 	return (temp);
 }
 
-
 t_word_desc	*make_word_flags(t_word_desc *w, const char *string)
 {
 	int		i;
@@ -40,7 +51,6 @@ t_word_desc	*make_word_flags(t_word_desc *w, const char *string)
 
 	i = 0;
 	slen = ft_strlen(string);
-	
 	/* Check for specific operators first */
 	if (ft_strcmp(string, "||") == 0)
 		w->flags |= W_OR;
@@ -71,7 +81,7 @@ t_word_desc	*make_word(const char *string)
 		return (NULL);
 	word_desc = make_bare_word(string);
 	if (!word_desc)
-		return (NULL);	
+		return (NULL);
 	return (make_word_flags(word_desc, string));
 }
 

@@ -1,12 +1,24 @@
-#include "minishell.h"
-#include "signal_handler.h"
-#include "redirect_utils.h"
-#include "make_cmd.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   shell.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:49:39 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:49:40 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "exit_value.h"
+#include "make_cmd.h"
+#include "minishell.h"
+#include "redirect_utils.h"
+#include "signal_handler.h"
 #include <unistd.h>
 
 /* Forward declaration */
-static int	execute_command_parts(char *cmd_str, char delimiter);
+static int			execute_command_parts(char *cmd_str, char delimiter);
 
 /* Skip whitespace characters */
 static const char	*skip_whitespace(const char *str)
@@ -68,13 +80,13 @@ static int	execute_command_parts(char *cmd_str, char delimiter)
 			if (shell_exit_status(0, GET) >= 0)
 			{
 				last_exit_code = shell_exit_status(0, GET);
-				break;
+				break ;
 			}
 		}
 		if (next_delim)
 			part = next_delim + 1;
 		else
-			break;
+			break ;
 	}
 	return (last_exit_code);
 }
@@ -88,22 +100,17 @@ static int	execute_command_string(const char *command_str)
 
 	if (!command_str)
 		return (0);
-	
 	/* Skip leading whitespace */
 	trimmed = skip_whitespace(command_str);
-	
 	/* If command is empty or only whitespace, do nothing */
 	if (!*trimmed)
 		return (0);
-	
 	/* Create a copy to modify */
 	cmd_copy = ft_strdup(command_str);
 	if (!cmd_copy)
 		return (1);
-	
 	/* Split by newlines, handling semicolons within each line */
 	last_exit_code = execute_command_parts(cmd_copy, '\n');
-	
 	free(cmd_copy);
 	return (last_exit_code);
 }
@@ -112,28 +119,48 @@ static int	execute_command_string(const char *command_str)
 static int	execute_stdin_commands(void)
 {
 	char	*line;
+	char	*full_input;
 	int		last_exit_code;
 	int		result;
+	size_t	len;
+	char	*temp;
 
 	last_exit_code = 0;
-	line = readline("");
-	while (line != NULL)
+	line = NULL;
+	full_input = NULL;
+	len = 0;
+	/* Read all input first */
+	while (getline(&line, &len, stdin) != -1)
 	{
 		if (line && *line)
 		{
-			result = execute_command_string(line);
-			if (shell_exit_status(0, GET) >= 0)
+			if (full_input)
 			{
-				last_exit_code = shell_exit_status(0, GET);
-				free(line);
-				break;
+				temp = ft_strjoin(full_input, line);
+				free(full_input);
+				full_input = temp;
 			}
-			if (result != 0)
-				last_exit_code = result;
+			else
+			{
+				full_input = ft_strdup(line);
+			}
 		}
-		free(line);
-		line = readline("");
 	}
+	/* Execute the complete input as one command */
+	if (full_input)
+	{
+		/* Remove trailing newline */
+		if (full_input[ft_strlen(full_input) - 1] == '\n')
+			full_input[ft_strlen(full_input) - 1] = '\0';
+		result = execute_command_string(full_input);
+		if (shell_exit_status(0, GET) >= 0)
+			last_exit_code = shell_exit_status(0, GET);
+		else if (result != 0)
+			last_exit_code = result;
+		free(full_input);
+	}
+	if (line)
+		free(line);
 	return (last_exit_code);
 }
 
@@ -155,8 +182,10 @@ int	shell(int argc, char **argv, char **envp)
 		return (handle_command_option(argv, envp));
 	if (argc > 1)
 	{
-		ft_dprintf(STDERR_FILENO, 
-			"%s: %s: No such file or directory\n", ENAME, argv[1]);
+		ft_dprintf(STDERR_FILENO,
+					"%s: %s: No such file or directory\n",
+					ENAME,
+					argv[1]);
 		return (127);
 	}
 	initialize_enviroment(envp);

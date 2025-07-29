@@ -1,5 +1,17 @@
-#include "process_utils.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   process_utils.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:12 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:12 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "env.h"
+#include "process_utils.h"
 #include "signal_handler.h"
 
 /* Count number of elements in word list */
@@ -17,7 +29,8 @@ int	count_word_list(t_word_list *list)
 }
 
 /* Create argv array from command path and arguments */
-char	**create_argv_array(const char *command_path, const char *command_name, t_word_list *args)
+char	**create_argv_array(const char *command_path, const char *command_name,
+		t_word_list *args)
 {
 	char		**argv;
 	int			argc;
@@ -26,12 +39,10 @@ char	**create_argv_array(const char *command_path, const char *command_name, t_w
 
 	if (!command_path)
 		return (NULL);
-	
-	argc = 1 + count_word_list(args);  /* command + args */
-	argv = ft_calloc(argc + 1, sizeof(char *));  /* +1 for NULL terminator */
+	argc = 1 + count_word_list(args);           /* command + args */
+	argv = ft_calloc(argc + 1, sizeof(char *)); /* +1 for NULL terminator */
 	if (!argv)
 		return (NULL);
-	
 	/* Set command as argv[0] - use command name instead of full path */
 	argv[0] = ft_strdup(command_name);
 	if (!argv[0])
@@ -39,7 +50,6 @@ char	**create_argv_array(const char *command_path, const char *command_name, t_w
 		free(argv);
 		return (NULL);
 	}
-	
 	/* Add arguments */
 	i = 1;
 	current = args;
@@ -57,7 +67,6 @@ char	**create_argv_array(const char *command_path, const char *command_name, t_w
 		current = current->next;
 		i++;
 	}
-	
 	argv[argc] = NULL;
 	return (argv);
 }
@@ -71,25 +80,23 @@ char	**create_envp_array(void)
 	char	*temp;
 	int		count;
 	int		i;
+	t_env	*temp_env;
 
 	env_list = env(NULL, GET);
 	if (!env_list)
 		return (NULL);
-	
 	/* Count environment variables */
 	count = 0;
-	t_env *temp_env = env_list;
+	temp_env = env_list;
 	while (temp_env)
 	{
 		if (temp_env->key)
 			count++;
 		temp_env = temp_env->next;
 	}
-	
 	envp = ft_calloc(count + 1, sizeof(char *));
 	if (!envp)
 		return (NULL);
-	
 	/* Create environment strings */
 	i = 0;
 	while (env_list && i < count)
@@ -111,7 +118,6 @@ char	**create_envp_array(void)
 			{
 				env_str = ft_strjoin(env_list->key, "=");
 			}
-			
 			if (!env_str)
 			{
 				free_envp_array(envp);
@@ -166,10 +172,10 @@ int	wait_for_child_process(pid_t pid)
 
 	if (waitpid(pid, &status, 0) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "waitpid failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "waitpid failed: %s\n",
+				strerror(errno));
 		return (1);
 	}
-	
 	if (WIFEXITED(status))
 	{
 		exit_code = WEXITSTATUS(status);
@@ -180,36 +186,37 @@ int	wait_for_child_process(pid_t pid)
 		exit_code = 128 + WTERMSIG(status);
 		return (exit_code);
 	}
-	
 	return (1);
 }
 
 /* Execute external command with fork/exec */
-int	execute_external_command(const char *command_path, const char *command_name, t_word_list *args)
+int	execute_external_command(const char *command_path, const char *command_name,
+		t_word_list *args)
 {
-	pid_t	pid;
-	char	**argv;
-	char	**envp;
-	int		exit_code;
+	pid_t pid;
+	char **argv;
+	char **envp;
+	int exit_code;
 
 	if (!command_path)
 		return (127);
-	
+
 	argv = create_argv_array(command_path, command_name, args);
 	if (!argv)
 		return (1);
-	
+
 	envp = create_envp_array();
 	if (!envp)
 	{
 		free_argv_array(argv);
 		return (1);
 	}
-	
+
 	pid = fork();
 	if (pid == -1)
 	{
-		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n",
+				strerror(errno));
 		free_argv_array(argv);
 		free_envp_array(envp);
 		return (1);
@@ -218,18 +225,19 @@ int	execute_external_command(const char *command_path, const char *command_name,
 	{
 		/* Child process - reset signals to default behavior */
 		setup_child_signals();
-		
+
 		if (execve(command_path, argv, envp) == -1)
 		{
-			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_name, strerror(errno));
+			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_name,
+					strerror(errno));
 			free_argv_array(argv);
 			free_envp_array(envp);
-			
+
 			/* Return appropriate exit code based on errno */
 			if (errno == EACCES)
-				exit(126);  /* Permission denied */
+				exit(126); /* Permission denied */
 			else
-				exit(127);  /* Command not found or other error */
+				exit(127); /* Command not found or other error */
 		}
 	}
 	else
@@ -237,14 +245,14 @@ int	execute_external_command(const char *command_path, const char *command_name,
 		/* Parent process - ignore signals while child is running */
 		setup_parent_signals();
 		exit_code = wait_for_child_process(pid);
-		
+
 		/* Restore original signal handlers after child completes */
 		set_signal();
-		
+
 		free_argv_array(argv);
 		free_envp_array(envp);
 		return (exit_code);
 	}
-	
+
 	return (1);
 }

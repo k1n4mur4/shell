@@ -1,6 +1,18 @@
-#include "parser.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   expand_variables.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:35 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:36 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "env.h"
 #include "eval.h"
+#include "parser.h"
 
 static int	is_valid_var_char(char c)
 {
@@ -10,7 +22,7 @@ static int	is_valid_var_char(char c)
 char	*get_env_value(const char *var_name)
 {
 	t_env	*env_list;
-	
+
 	env_list = env(NULL, GET);
 	while (env_list)
 	{
@@ -37,8 +49,8 @@ char	*get_special_var(char c)
 
 char	*extract_var_name(const char *str, int *advance)
 {
-	int		i;
-	char	*var_name;
+	int i;
+	char *var_name;
 
 	if (!str || str[0] != '$')
 		return (NULL);

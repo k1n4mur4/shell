@@ -1,12 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   dispose_cmd.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:37:38 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:37:43 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "dispose_cmd.h"
 #include "make_cmd.h"
 
-void	dispose_current_command(t_command	*command)
+void	dispose_current_command(t_command *command)
 {
 	if (!command)
-		return;
-	
-	/* Free AST components without freeing the command structure itself */
+		return ;
 	if (command->simple)
 	{
 		dispose_words(command->simple->words);

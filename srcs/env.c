@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   env.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:54 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 02:07:07 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "env.h"
 
 void	dispose_env(t_env *env_list)
@@ -33,8 +45,6 @@ void	add_env_value(t_env *env, t_env *lst)
 
 	if (!env)
 		return ;
-	// if (ft_strncmp(env->value, lst->value, ft_strlen(lst->value)) == 0)
-	// 	return ;
 	value = ft_strdup(lst->value);
 	free(env->value);
 	dispose_env(lst);
@@ -89,7 +99,6 @@ static t_env	*sort_env_list(t_env *env_list)
 
 	if (!env_list || !env_list->next)
 		return (env_list);
-	
 	sorted = env_list;
 	swapped = 1;
 	while (swapped)
@@ -130,7 +139,6 @@ static t_env	*copy_env_list(t_env *env_list)
 
 	if (!env_list)
 		return (NULL);
-	
 	copy = NULL;
 	last = NULL;
 	current = env_list;
@@ -178,11 +186,9 @@ void	show_env_list(t_env *env_list)
 
 	sorted_copy = copy_env_list(env_list);
 	if (!sorted_copy)
-		return;
-	
+		return ;
 	sorted_copy = sort_env_list(sorted_copy);
 	current = sorted_copy;
-	
 	while (current)
 	{
 		if (current->key)
@@ -194,14 +200,14 @@ void	show_env_list(t_env *env_list)
 		}
 		current = current->next;
 	}
-	
 	free_env_list(sorted_copy);
 }
 
 t_env	*env(t_env *env_list, enum e_type type)
 {
-	static	t_env	*env = NULL;
+	static t_env	*env;
 
+	env = NULL;
 	if (type == GET)
 		return (env);
 	if (type == SET)

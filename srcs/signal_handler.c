@@ -1,7 +1,19 @@
-#include "signal_handler.h"
-#include "redirect_utils.h"
-#include "libft.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   signal_handler.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:49:42 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:49:45 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_printf.h"
+#include "libft.h"
+#include "redirect_utils.h"
+#include "signal_handler.h"
 #include <unistd.h>
 
 /* シグナルハンドラー関数 */
@@ -15,7 +27,6 @@ void	signal_handler(int signum)
 		rl_replace_line("", 0);
 		rl_redisplay();
 	}
-	/* SIGQUITはset_signal()でSIG_IGNにより完全に無視される */
 }
 
 /* シグナルハンドラーを設定 */
@@ -27,19 +38,19 @@ void	set_signal(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = signal_handler;
-
 	/* SIGINTハンドラーを設定（Ctrl+C） */
 	if (sigaction(SIGINT, &sa, NULL) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "failed to set SIGINT handler\n");
+		ft_dprintf(STDERR_FILENO,
+					ERROR_PREFIX "failed to set SIGINT handler\n");
 		return ;
 	}
-
 	/* SIGQUITハンドラーを設定（Ctrl+\） - 完全に無視 */
 	sa.sa_handler = SIG_IGN;
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "failed to set SIGQUIT handler\n");
+		ft_dprintf(STDERR_FILENO,
+					ERROR_PREFIX "failed to set SIGQUIT handler\n");
 		return ;
 	}
 }
@@ -59,10 +70,8 @@ void	setup_child_signals(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sa.sa_handler = SIG_DFL;
-
 	/* SIGINTをデフォルトにリセット（プロセス終了） */
 	sigaction(SIGINT, &sa, NULL);
-	
 	/* SIGQUITをデフォルトにリセット（コアダンプ） */
 	sigaction(SIGQUIT, &sa, NULL);
 }
@@ -70,7 +79,7 @@ void	setup_child_signals(void)
 /* コマンド実行中の親プロセス用シグナル設定 */
 void	setup_parent_signals(void)
 {
-	struct sigaction	sa;
+	struct sigaction sa;
 
 	/* 子プロセス実行中は親プロセスでシグナルを無視 */
 	sigemptyset(&sa.sa_mask);
@@ -79,7 +88,7 @@ void	setup_parent_signals(void)
 
 	/* 子プロセス実行中はSIGINTを無視 */
 	sigaction(SIGINT, &sa, NULL);
-	
+
 	/* 子プロセス実行中はSIGQUITを無視 */
 	sigaction(SIGQUIT, &sa, NULL);
 }

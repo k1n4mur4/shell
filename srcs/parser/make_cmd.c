@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   make_cmd.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/30 01:48:40 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/30 01:48:41 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "make_cmd.h"
 
 /* Allocate command structure */
@@ -46,7 +58,7 @@ t_redirect	*alloc_redirect(void)
 /* Create simple command */
 t_command	*make_simple_command(t_word_list *words, t_redirect *redirects)
 {
-	t_command		*cmd;
+	t_command			*cmd;
 	t_simple_command	*simple;
 
 	cmd = alloc_command();
@@ -66,7 +78,8 @@ t_command	*make_simple_command(t_word_list *words, t_redirect *redirects)
 }
 
 /* Create binary command (pipe, and, or) */
-t_command	*make_binary_command(t_command_type type, t_command *left, t_command *right)
+t_command	*make_binary_command(t_command_type type, t_command *left,
+		t_command *right)
 {
 	t_command	*cmd;
 
@@ -116,7 +129,7 @@ void	dispose_ast_command(t_command *cmd)
 /* Dispose redirects */
 void	dispose_redirects(t_redirect *redirects)
 {
-	t_redirect	*next;
+	t_redirect *next;
 
 	while (redirects)
 	{
