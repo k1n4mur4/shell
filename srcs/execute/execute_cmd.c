@@ -21,7 +21,6 @@ void	execute_command(t_command *command)
 
 	if (!command)
 		return ;
-	
 	exit_code = 0;
 	if (command->type == CM_SIMPLE && command->simple)
 		exit_code = execute_simple_command(command->simple);
@@ -29,7 +28,6 @@ void	execute_command(t_command *command)
 		exit_code = execute_pipeline(command->left, command->right);
 	else if (command->type == CM_AND || command->type == CM_OR)
 		exit_code = execute_binary_command(command->left, command->right, command->type);
-	
 	exit_value(exit_code, SET);
 }
 
@@ -41,16 +39,12 @@ static int	execute_simple_command(t_simple_command *simple)
 	char				*command_path;
 	t_redirect_backup	backup;
 	int					exit_code;
-	
+
 	if (!simple || !simple->words || !simple->words->word || !simple->words->word->word)
 		return (0);
-	
 	words = simple->words;
 	command_name = words->word->word;
-	
-	/* Initialize redirection backup */
 	init_redirect_backup(&backup);
-	
 	/* Setup redirections if any */
 	if (simple->redirects)
 	{

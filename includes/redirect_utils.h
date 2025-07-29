@@ -40,7 +40,6 @@ void				init_redirect_backup(t_redirect_backup *backup);
 void				print_redirect_error(const char *filename, const char *error_msg);
 
 /* Temporary file functions for heredoc */
-char				*create_temp_file(void);
-void				cleanup_temp_file(const char *temp_filename);
+void				cleanup_temp_file(char *template);
 
 #endif

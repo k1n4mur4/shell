@@ -1,111 +1,106 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   redirect_heredoc.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/23 00:04:41 by kinamura          #+#    #+#             */
+/*   Updated: 2025/07/23 00:05:11 by kinamura         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "redirect_utils.h"
 
-char	*create_temp_file(void)
+void	cleanup_temp_file(char *template)
 {
-	char		*pid_str;
-	char		*counter_str;
-	char		*temp_part;
-	char		*temp_id;
-	char		*temp_filename;
-	int			fd;
-	static int	counter = 0;
-
-	pid_str = ft_itoa(getpid());
-	if (!pid_str)
-		return (NULL);
-	counter_str = ft_itoa(counter++);
-	if (!counter_str)
+	if (template)
 	{
-		free(pid_str);
-		return (NULL);
+		free(template);
+		unlink(template);
 	}
-	temp_part = ft_strjoin(pid_str, "_");
-	free(pid_str);
-	if (!temp_part)
-	{
-		free(counter_str);
-		return (NULL);
-	}
-	temp_id = ft_strjoin(temp_part, counter_str);
-	free(temp_part);
-	free(counter_str);
-	if (!temp_id)
-		return (NULL);
-	temp_filename = ft_strjoin("/tmp/.minishell_heredoc_", temp_id);
-	free(temp_id);
-	if (!temp_filename)
-		return (NULL);
-	fd = open(temp_filename, O_CREAT | O_WRONLY | O_TRUNC, 0600);
-	if (fd == -1)
-	{
-		free(temp_filename);
-		return (NULL);
-	}
-	close(fd);
-	return (temp_filename);
 }
 
-int	handle_heredoc_redirect(const char *delimiter)
+char	*ft_strappend(char **s1, char *s2)
 {
-	char	*temp_filename;
+	char	*str;
+	size_t	s1_len;
+	size_t	s2_len;
+
+	s1_len = ft_strlen(*s1);
+	s2_len = ft_strlen(s2);
+	str = (char *)ft_calloc(sizeof(char), (s1_len + s2_len + 1));
+	if (!str)
+	{
+		if (*s1)
+			free(*s1);
+		if (s2)
+			free(s2);
+		return (NULL);
+	}
+	if (*s1)
+		ft_strlcpy(str, *s1, s1_len + 1);
+	if (s2)
+		ft_strlcat(str, s2, s1_len + s2_len + 1);
+	if (*s1)
+		free(*s1);
+	if (s2)
+		free(s2);
+	*s1 = str;
+	return (*s1);
+}
+
+static char	*read_heredoc_content(const char *delimiter)
+{
 	char	*line;
-	int		fd;
-	int		result;
+	char	*content;
 	size_t	delim_len;
 
-	if (!delimiter)
-		return (-1);
-	
-	temp_filename = create_temp_file();
-	if (!temp_filename)
-	{
-		print_redirect_error("heredoc", "temporary file creation failed");
-		return (-1);
-	}
-
-	fd = open(temp_filename, O_WRONLY | O_APPEND);
-	if (fd == -1)
-	{
-		print_redirect_error(temp_filename, strerror(errno));
-		cleanup_temp_file(temp_filename);
-		free(temp_filename);
-		return (-1);
-	}
-
+	content = NULL;
 	delim_len = ft_strlen(delimiter);
 	while (1)
 	{
 		line = readline("> ");
 		if (!line)
 		{
-			result = -1;
-			break ;
+			free(content);
+			return (NULL);
 		}
-		if (line && ft_strlen(line) > 0 && line[ft_strlen(line) - 1] == '\n')
-			line[ft_strlen(line) - 1] = '\0';
-		if (ft_strncmp(line, delimiter, delim_len) == 0 && 
-			ft_strlen(line) == delim_len)
+		if (ft_strlen(line) == delim_len && ft_strcmp(line, delimiter) == 0)
 		{
 			free(line);
-			result = 0;
 			break ;
 		}
-		write(fd, line, ft_strlen(line));
-		write(fd, "\n", 1);
-		free(line);
+		ft_strappend(&content, line);
+		if (!content)
+			return (NULL);
 	}
-	close(fd);
+	return (content);
+}
 
-	if (result == -1)
+int	handle_heredoc_redirect(const char *delimiter)
+{
+	char	*template;
+	char	*content;
+	int		fd;
+	int		result;
+
+	if (!delimiter)
+		return (-1);
+	template = ft_strdup("/tmp/.minishell_heredoc_XXXXXX");
+	fd = ft_mkstemp(template);
+	if (fd < 0)
 	{
-		cleanup_temp_file(temp_filename);
-		free(temp_filename);
+		print_redirect_error(template, strerror(errno));
+		if (template)
+			free(template);
 		return (-1);
 	}
-
-	result = handle_input_redirect(temp_filename);
-	cleanup_temp_file(temp_filename);
-	free(temp_filename);
-	
+	content = read_heredoc_content(delimiter);
+	result = ft_fputs(content, fd);
+	close(fd);
+	if (result >= 0)
+		result = handle_input_redirect(template);
+	cleanup_temp_file(template);
 	return (result);
 }

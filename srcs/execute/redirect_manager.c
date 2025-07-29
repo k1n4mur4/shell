@@ -17,7 +17,6 @@ int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
 	backup->stdin_backup = dup(STDIN_FILENO);
 	backup->stdout_backup = dup(STDOUT_FILENO);
 	backup->stderr_backup = dup(STDERR_FILENO);
-	
 	current = redirects;
 	while (current)
 	{
