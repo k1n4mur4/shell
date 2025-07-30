@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 00:04:41 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:21 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:46:59 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,6 @@ static char	*read_heredoc_content(const char *delimiter)
 
 	content = NULL;
 	delim_len = ft_strlen(delimiter);
-	/* Save original stdout to ensure prompts go to terminal */
 	original_stdout = dup(STDOUT_FILENO);
 	if (original_stdout == -1)
 		return (NULL);
@@ -105,15 +104,11 @@ static char	*read_heredoc_content(const char *delimiter)
 	sigaction(SIGINT, &new_sa, &old_sa);
 	while (1)
 	{
-		/* Temporarily restore stdout for prompt display */
 		if (isatty(original_stdout))
 			dup2(original_stdout, STDOUT_FILENO);
-		
 		line = readline("> ");
-		
 		if (!line)
 		{
-			/* Ctrl+D or signal interruption */
 			free(content);
 			content = NULL;
 			break ;
@@ -127,7 +122,6 @@ static char	*read_heredoc_content(const char *delimiter)
 		if (!content)
 			break ;
 	}
-	/* Restore original signal handler */
 	sigaction(SIGINT, &old_sa, NULL);
 	close(original_stdout);
 	return (content);

@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:23 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 02:09:12 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:47:31 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void	init_redirect_backup(t_redirect_backup *backup)
 	backup->stderr_backup = -1;
 }
 
-/* Find the last redirection of specified types */
 static t_redirect	*find_last_redirect(t_redirect *redirects, int types)
 {
 	t_redirect	*current;
@@ -61,26 +60,19 @@ int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
 		init_redirect_backup(backup);
 		return (-1);
 	}
-
-	/* Find the last redirection of each type */
 	last_input = find_last_redirect(redirects, (1 << R_INPUT));
 	last_output = find_last_redirect(redirects, (1 << R_OUTPUT) | (1 << R_APPEND));
 	last_heredoc = find_last_redirect(redirects, (1 << R_HEREDOC));
-
-	/* Apply heredoc first (it can affect input) */
 	if (last_heredoc)
 	{
 		if (handle_heredoc_redirect(last_heredoc->filename) == -1)
 			return (-1);
 	}
-	/* Apply input redirection */
 	else if (last_input)
 	{
 		if (handle_input_redirect(last_input->filename) == -1)
 			return (-1);
 	}
-
-	/* Apply output redirection */
 	if (last_output)
 	{
 		if (last_output->type == R_OUTPUT)
@@ -94,7 +86,6 @@ int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
 				return (-1);
 		}
 	}
-
 	return (0);
 }
 
@@ -102,7 +93,6 @@ void	restore_redirections(t_redirect_backup *backup)
 {
 	if (!backup)
 		return ;
-
 	if (backup->stdin_backup != -1)
 	{
 		dup2(backup->stdin_backup, STDIN_FILENO);

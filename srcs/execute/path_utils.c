@@ -6,13 +6,12 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:07 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:08 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:43:48 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "path_utils.h"
 
-/* Check if file is executable */
 int	is_executable(const char *path)
 {
 	struct stat	st;
@@ -28,7 +27,6 @@ int	is_executable(const char *path)
 	return (1);
 }
 
-/* Get PATH directories as array */
 char	**get_path_dirs(void)
 {
 	t_env	*env_list;
@@ -49,7 +47,6 @@ char	**get_path_dirs(void)
 	return (NULL);
 }
 
-/* Find command in PATH */
 char	*find_command_path(const char *command)
 {
 	char **path_dirs;
@@ -60,19 +57,15 @@ char	*find_command_path(const char *command)
 	if (!command)
 		return (NULL);
 
-	/* If command contains '/', treat as absolute/relative path */
 	if (ft_strchr(command, '/'))
 	{
 		if (is_executable(command))
 			return (ft_strdup(command));
 		return (NULL);
 	}
-
-	/* Search in PATH directories */
 	path_dirs = get_path_dirs();
 	if (!path_dirs)
 		return (NULL);
-
 	i = 0;
 	while (path_dirs[i])
 	{

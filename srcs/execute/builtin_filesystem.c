@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:00 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:02 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:40:46 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ static void	update_pwd_vars(char *old_pwd, char *new_pwd)
 	t_env	*oldpwd_node;
 
 	env_list = env(NULL, GET);
-	// Update OLDPWD
 	oldpwd_node = search_env(env_list, "OLDPWD");
 	if (oldpwd_node)
 	{
@@ -37,7 +36,6 @@ static void	update_pwd_vars(char *old_pwd, char *new_pwd)
 			env(oldpwd_node, ADD);
 		}
 	}
-	// Update PWD
 	pwd_node = search_env(env_list, "PWD");
 	if (pwd_node)
 	{
@@ -87,13 +85,9 @@ int	builtin_cd(t_word_list *args)
 		ft_dprintf(STDERR_FILENO, "minishell: cd: too many arguments\n");
 		return (1);
 	}
-
-	// Get current PWD before changing directory
 	current_pwd = getcwd(NULL, 0);
-
 	if (!args || !args->word || !args->word->word)
 	{
-		// cd with no arguments - go to HOME
 		env_list = env(NULL, GET);
 		home = NULL;
 		while (env_list)
@@ -115,7 +109,6 @@ int	builtin_cd(t_word_list *args)
 	}
 	else if (ft_strcmp(args->word->word, "-") == 0)
 	{
-		// cd - : go to OLDPWD
 		env_list = env(NULL, GET);
 		oldpwd_node = search_env(env_list, "OLDPWD");
 		if (!oldpwd_node || !oldpwd_node->value)
@@ -126,7 +119,6 @@ int	builtin_cd(t_word_list *args)
 		}
 		path = oldpwd_node->value;
 		ft_dprintf(STDOUT_FILENO, "%s\n", path);
-		// Print the directory we're going to
 	}
 	else
 		path = args->word->word;
@@ -138,8 +130,6 @@ int	builtin_cd(t_word_list *args)
 		free(current_pwd);
 		return (1);
 	}
-
-	// Get new PWD after changing directory
 	new_pwd = getcwd(NULL, 0);
 	if (!new_pwd)
 	{
@@ -148,10 +138,7 @@ int	builtin_cd(t_word_list *args)
 		free(current_pwd);
 		return (1);
 	}
-
-	// Update PWD and OLDPWD environment variables
 	update_pwd_vars(current_pwd, new_pwd);
-
 	free(current_pwd);
 	free(new_pwd);
 	return (0);

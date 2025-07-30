@@ -6,13 +6,12 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:26 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:27 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:35:37 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "make_cmd.h"
 
-/* Free a single word descriptor */
 void	dispose_word(t_word_desc *w)
 {
 	if (!w)
@@ -22,7 +21,6 @@ void	dispose_word(t_word_desc *w)
 	free(w);
 }
 
-/* Free a word list */
 void	dispose_words(t_word_list *list)
 {
 	t_word_list	*temp;
@@ -36,7 +34,6 @@ void	dispose_words(t_word_list *list)
 	}
 }
 
-/* Copy a word list */
 t_word_list	*copy_word_list(t_word_list *list)
 {
 	t_word_list *new_list;

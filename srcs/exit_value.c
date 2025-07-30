@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:49:27 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:49:27 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:35:01 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,9 @@ int	exit_value(int exit_value, enum e_type type)
 	static int	last_command_exit_value = 0;
 
 	if (type == SET)
-	{
-		/* Ensure exit value is in valid range (0-255) for bash compatibility */
 		last_command_exit_value = exit_value & 255;
-	}
 	else if (type == GET)
-	{
 		exit_value = last_command_exit_value;
-	}
 	return (exit_value);
 }
 

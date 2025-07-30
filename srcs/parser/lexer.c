@@ -6,33 +6,29 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:38 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:38 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:37:03 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "error.h"
 #include "parser.h"
 
-/* Check if character is whitespace */
 static int	is_whitespace(char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n');
 }
 
-/* Check if character is special operator */
 static int	is_operator_char(char c)
 {
 	return (c == '|' || c == '<' || c == '>' || c == '&');
 }
 
-/* Skip whitespace in input */
 static void	skip_whitespace(const char **input)
 {
 	while (**input && is_whitespace(**input))
 		(*input)++;
 }
 
-/* Extract quoted string with quotes preserved */
 static char	*extract_quoted_string(const char **input, char quote)
 {
 	const char	*start;
@@ -54,7 +50,6 @@ static char	*extract_quoted_string(const char **input, char quote)
 	return (result);
 }
 
-/* Extract operator token */
 static char	*extract_operator(const char **input)
 {
 	const char	*start;
@@ -78,7 +73,6 @@ static char	*extract_operator(const char **input)
 	return (result);
 }
 
-/* Extract regular word */
 static char	*extract_word(const char **input)
 {
 	const char	*start;
@@ -97,13 +91,11 @@ static char	*extract_word(const char **input)
 	return (result);
 }
 
-/* Check if character can be part of a word token */
 static int	is_word_char(char c)
 {
 	return (!is_whitespace(c) && !is_operator_char(c));
 }
 
-/* Helper function to append string */
 static char	*append_string(char *base, char *append)
 {
 	char	*new_str;
@@ -124,7 +116,6 @@ static char	*append_string(char *base, char *append)
 	return (new_str);
 }
 
-/* Initialize empty result string for word extraction */
 static char	*init_word_result(void)
 {
 	char	*result;
@@ -135,7 +126,6 @@ static char	*init_word_result(void)
 	return (result);
 }
 
-/* Process a single part of a word (quoted or unquoted) */
 static char	*process_word_part(const char **input, char *result)
 {
 	char	*part;
@@ -160,7 +150,6 @@ static char	*process_word_part(const char **input, char *result)
 	return (tmp);
 }
 
-/* Extract complete word including consecutive quotes and regular chars */
 static char	*extract_complete_word(const char **input)
 {
 	char	*result;
@@ -182,7 +171,6 @@ static char	*extract_complete_word(const char **input)
 	return (result);
 }
 
-/* Get next token from input */
 static char	*get_next_token(const char **input)
 {
 	skip_whitespace(input);
@@ -194,7 +182,6 @@ static char	*get_next_token(const char **input)
 		return (extract_complete_word(input));
 }
 
-/* Update quote state based on current character */
 static void	update_quote_state(char c, int *in_squote, int *in_dquote)
 {
 	if (c == '\'' && !*in_dquote)
@@ -203,7 +190,6 @@ static void	update_quote_state(char c, int *in_squote, int *in_dquote)
 		*in_dquote = !*in_dquote;
 }
 
-/* Check for unclosed quotes and report errors */
 static int	check_quote_errors(int in_squote, int in_dquote)
 {
 	if (in_squote)
@@ -219,7 +205,6 @@ static int	check_quote_errors(int in_squote, int in_dquote)
 	return (1);
 }
 
-/* Pre-validate input for syntax errors */
 static int	validate_input(const char *input)
 {
 	int	in_squote;
@@ -235,7 +220,6 @@ static int	validate_input(const char *input)
 	return (check_quote_errors(in_squote, in_dquote));
 }
 
-/* Process a single token and add it to the word list */
 static t_word_list	*process_single_token(const char **current,
 											t_word_list *word_list)
 {
@@ -266,7 +250,6 @@ static t_word_list	*process_single_token(const char **current,
 	return (word_list);
 }
 
-/* Main lexer function - tokenize input string into word list */
 t_word_list	*lexer_tokenize(const char *input)
 {
 	t_word_list *word_list;

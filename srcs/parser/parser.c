@@ -6,21 +6,19 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:47 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 02:06:22 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:39:24 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "error.h"
 #include "parser.h"
 
-/* Static function declarations */
 static t_command	*parse_pipeline(t_word_list **tokens);
 static t_command	*parse_and_or(t_word_list **tokens);
 static t_command	*parse_simple_command(t_word_list **tokens);
 static int			is_redirect_operator(const char *token);
 static void			append_redirect(t_redirect **head, t_redirect *new_redirect);
 
-/* Debug function to print word list */
 void	print_word_list(t_word_list *list)
 {
 	t_word_list	*current;
@@ -36,7 +34,6 @@ void	print_word_list(t_word_list *list)
 	}
 }
 
-/* Debug function to print AST */
 static void	print_ast(t_command *cmd, int depth)
 {
 	int			i;
@@ -105,7 +102,6 @@ static void	print_ast(t_command *cmd, int depth)
 	}
 }
 
-/* Parse command line into word list */
 t_word_list	*parse_command_line(const char *input)
 {
 	if (!input || !*input)
@@ -113,7 +109,6 @@ t_word_list	*parse_command_line(const char *input)
 	return (lexer_tokenize(input));
 }
 
-/* Parse tokens into AST */
 t_command	*parse_tokens_to_ast(t_word_list *tokens)
 {
 	t_word_list	*token_copy;
@@ -124,7 +119,6 @@ t_command	*parse_tokens_to_ast(t_word_list *tokens)
 	return (parse_and_or(&token_copy));
 }
 
-/* Parse and/or operators (lowest precedence) */
 static t_command	*parse_and_or(t_word_list **tokens)
 {
 	t_command	*left;
@@ -163,7 +157,6 @@ static t_command	*parse_and_or(t_word_list **tokens)
 	return (left);
 }
 
-/* Parse pipeline (higher precedence than &&) */
 static t_command	*parse_pipeline(t_word_list **tokens)
 {
 	t_command	*left;
@@ -175,7 +168,6 @@ static t_command	*parse_pipeline(t_word_list **tokens)
 	while (*tokens && ((*tokens)->word->flags & W_PIPE))
 	{
 		*tokens = (*tokens)->next;
-		/* Check for missing command after pipe */
 		if (!*tokens)
 		{
 			parser_error(NULL, ERROR_PARSE, "\\n");
@@ -198,7 +190,6 @@ static t_command	*parse_pipeline(t_word_list **tokens)
 	return (left);
 }
 
-/* Parse simple command with redirections */
 static t_command	*parse_simple_command(t_word_list **tokens)
 {
 	t_word_list		*words;
@@ -210,7 +201,6 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 
 	if (!tokens || !*tokens)
 		return (NULL);
-	/* Allow standalone redirect operators - they form valid simple commands */
 	words = NULL;
 	redirects = NULL;
 	while (*tokens)
@@ -222,7 +212,6 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 			break ;
 		if (is_redirect_operator(current->word->word))
 		{
-			/* Determine redirection type (check longer operators first) */
 			if (ft_strcmp(current->word->word, ">>") == 0)
 				type = R_APPEND;
 			else if (ft_strcmp(current->word->word, "<<") == 0)
@@ -237,7 +226,6 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 				continue ;
 			}
 			*tokens = (*tokens)->next;
-			/* Check for missing filename after redirection operator */
 			if (!*tokens || !(*tokens)->word)
 			{
 				parser_error(NULL, ERROR_PARSE, "\\n");
@@ -245,7 +233,6 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 				dispose_redirects(redirects);
 				return (NULL);
 			}
-			/* Check for invalid redirection target (operators) */
 			if (is_redirect_operator((*tokens)->word->word) ||
 				((*tokens)->word->flags & W_PIPE) ||
 				((*tokens)->word->word && ft_strcmp((*tokens)->word->word,
@@ -286,7 +273,6 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 	return (make_simple_command(words, redirects));
 }
 
-/* Check if token is redirection operator */
 static int	is_redirect_operator(const char *token)
 {
 	if (!token)
@@ -297,7 +283,6 @@ static int	is_redirect_operator(const char *token)
 	return (0);
 }
 
-/* Main parser function */
 void	parser(t_command *command)
 {
 	t_word_list *word_list;
@@ -311,42 +296,23 @@ void	parser(t_command *command)
 	command->right = NULL;
 	word_list = parse_command_line(command->current_command);
 	if (!word_list)
-	{
-		/* ft_dprintf(STDOUT_FILENO, "No tokens parsed\n"); */
 		return ;
-	}
-	/* ft_dprintf(STDOUT_FILENO, "Tokens:\n");
-	print_word_list(word_list); */
 	ast = parse_tokens_to_ast(word_list);
 	if (ast)
 	{
-		/* ft_dprintf(STDOUT_FILENO, "AST before expansion:\n");
-		print_ast(ast, 0); */
-
 		expand_ast(ast);
-
-		/* ft_dprintf(STDOUT_FILENO, "AST after expansion:\n");
-		print_ast(ast, 0); */
-
-		/* Copy AST structure to command for execution */
 		command->type = ast->type;
 		command->simple = ast->simple;
 		command->left = ast->left;
 		command->right = ast->right;
-		/* Prevent double-free by clearing ast pointers */
 		ast->simple = NULL;
 		ast->left = NULL;
 		ast->right = NULL;
 		dispose_ast_command(ast);
 	}
-	else
-	{
-		/* ft_dprintf(STDOUT_FILENO, "Failed to create AST\n"); */
-	}
 	dispose_words(word_list);
 }
 
-/* Helper function to append redirect to end of list */
 static void	append_redirect(t_redirect **head, t_redirect *new_redirect)
 {
 	t_redirect	*current;

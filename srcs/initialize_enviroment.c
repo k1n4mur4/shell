@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:49:30 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:49:31 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:34:03 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,6 @@ void	initialize_enviroment(char **envp)
 
 	if (!envp || !*envp)
 	{
-		/* Debug: ft_dprintf(STDERR_FILENO,
-				"Warning: No environment variables found\n"); */
 		return ;
 	}
 	count = 0;
@@ -90,6 +88,4 @@ void	initialize_enviroment(char **envp)
 		envp++;
 		count++;
 	}
-	/* Debug: ft_dprintf(STDERR_FILENO, "Initialized
-			%d environment variables\n", count); */
 }

@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:29 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:30 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:35:52 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,5 @@ void	expand_ast(t_command *ast)
 		expand_ast(ast->right);
 	}
 	else if (ast->type == CM_AND || ast->type == CM_OR)
-	{
-		/* For logical operators, only expand left side initially.
-			Right side will be expanded during execution if needed. */
 		expand_ast(ast->left);
-	}
 }

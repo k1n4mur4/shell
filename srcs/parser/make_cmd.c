@@ -6,13 +6,12 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:40 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:41 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:37:41 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "make_cmd.h"
 
-/* Allocate command structure */
 t_command	*alloc_command(void)
 {
 	t_command	*cmd;
@@ -28,7 +27,6 @@ t_command	*alloc_command(void)
 	return (cmd);
 }
 
-/* Allocate simple command structure */
 t_simple_command	*alloc_simple_command(void)
 {
 	t_simple_command	*simple;
@@ -41,7 +39,6 @@ t_simple_command	*alloc_simple_command(void)
 	return (simple);
 }
 
-/* Allocate redirect structure */
 t_redirect	*alloc_redirect(void)
 {
 	t_redirect	*redirect;
@@ -55,7 +52,6 @@ t_redirect	*alloc_redirect(void)
 	return (redirect);
 }
 
-/* Create simple command */
 t_command	*make_simple_command(t_word_list *words, t_redirect *redirects)
 {
 	t_command			*cmd;
@@ -77,7 +73,6 @@ t_command	*make_simple_command(t_word_list *words, t_redirect *redirects)
 	return (cmd);
 }
 
-/* Create binary command (pipe, and, or) */
 t_command	*make_binary_command(t_command_type type, t_command *left,
 		t_command *right)
 {
@@ -92,7 +87,6 @@ t_command	*make_binary_command(t_command_type type, t_command *left,
 	return (cmd);
 }
 
-/* Create redirect */
 t_redirect	*make_redirect(t_redirect_type type, const char *filename)
 {
 	t_redirect	*redirect;
@@ -106,7 +100,6 @@ t_redirect	*make_redirect(t_redirect_type type, const char *filename)
 	return (redirect);
 }
 
-/* Dispose command structure */
 void	dispose_ast_command(t_command *cmd)
 {
 	if (!cmd)
@@ -126,7 +119,6 @@ void	dispose_ast_command(t_command *cmd)
 	free(cmd);
 }
 
-/* Dispose redirects */
 void	dispose_redirects(t_redirect *redirects)
 {
 	t_redirect *next;

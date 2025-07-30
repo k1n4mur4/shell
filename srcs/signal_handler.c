@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:49:42 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:49:45 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 19:33:02 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,10 @@
 #include "signal_handler.h"
 #include <unistd.h>
 
-/* シグナルハンドラー関数 */
 void	signal_handler(int signum)
 {
 	if (signum == SIGINT)
 	{
-		/* 改行を出力してreadlineを新しい行に設定 */
 		ft_dprintf(STDOUT_FILENO, "\n");
 		rl_on_new_line();
 		rl_replace_line("", 0);
@@ -34,7 +32,6 @@ void	set_signal(void)
 {
 	struct sigaction	sa;
 
-	/* シグナルアクション構造体を初期化 */
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = signal_handler;
@@ -45,7 +42,6 @@ void	set_signal(void)
 					ERROR_PREFIX "failed to set SIGINT handler\n");
 		return ;
 	}
-	/* SIGQUITハンドラーを設定（Ctrl+\） - 完全に無視 */
 	sa.sa_handler = SIG_IGN;
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 	{
@@ -55,40 +51,29 @@ void	set_signal(void)
 	}
 }
 
-/* シェルのシグナル処理を初期化 */
 void	shell_initialize(void)
 {
 	set_signal();
 }
 
-/* 子プロセス用のシグナル設定（デフォルトにリセット） */
 void	setup_child_signals(void)
 {
 	struct sigaction	sa;
 
-	/* 子プロセスでシグナルをデフォルト動作にリセット */
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sa.sa_handler = SIG_DFL;
-	/* SIGINTをデフォルトにリセット（プロセス終了） */
 	sigaction(SIGINT, &sa, NULL);
-	/* SIGQUITをデフォルトにリセット（コアダンプ） */
 	sigaction(SIGQUIT, &sa, NULL);
 }
 
-/* コマンド実行中の親プロセス用シグナル設定 */
 void	setup_parent_signals(void)
 {
 	struct sigaction sa;
 
-	/* 子プロセス実行中は親プロセスでシグナルを無視 */
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sa.sa_handler = SIG_IGN;
-
-	/* 子プロセス実行中はSIGINTを無視 */
 	sigaction(SIGINT, &sa, NULL);
-
-	/* 子プロセス実行中はSIGQUITを無視 */
 	sigaction(SIGQUIT, &sa, NULL);
 }
