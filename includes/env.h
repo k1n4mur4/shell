@@ -37,4 +37,9 @@ void				add_env_list(t_env *env, t_env *env_list);
 void				show_env_list(t_env *env_list);
 t_env				*env(t_env *env_list, enum e_type type);
 
+int					compare_env_keys(t_env *a, t_env *b);
+t_env				*sort_env_list(t_env *env_list);
+t_env				*copy_env_list(t_env *env_list);
+void				free_env_list(t_env *env_list);
+
 #endif

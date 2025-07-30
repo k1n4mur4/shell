@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexer.c                                            :+:      :+:    :+:   */
+/*   lexer_validation.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -13,24 +13,40 @@
 #include "error.h"
 #include "parser.h"
 
-t_word_list	*lexer_tokenize(const char *input)
+void	update_quote_state(char c, int *in_squote, int *in_dquote)
 {
-	t_word_list *word_list;
-	const char *current;
+	if (c == '\'' && !*in_dquote)
+		*in_squote = !*in_squote;
+	else if (c == '"' && !*in_squote)
+		*in_dquote = !*in_dquote;
+}
 
-	if (!input)
-		return (NULL);
-	if (!validate_input(input))
-		return (NULL);
-	word_list = NULL;
-	current = input;
-	while (*current)
+int	check_quote_errors(int in_squote, int in_dquote)
+{
+	if (in_squote)
 	{
-		word_list = process_single_token(&current, word_list);
-		if (!word_list && *current)
-			return (NULL);
-		if (!*current)
-			break ;
+		parser_error(NULL, ERROR_SYNTAX, '\'');
+		return (0);
 	}
-	return (word_list);
+	if (in_dquote)
+	{
+		parser_error(NULL, ERROR_SYNTAX, '"');
+		return (0);
+	}
+	return (1);
+}
+
+int	validate_input(const char *input)
+{
+	int	in_squote;
+	int	in_dquote;
+
+	in_squote = 0;
+	in_dquote = 0;
+	while (*input)
+	{
+		update_quote_state(*input, &in_squote, &in_dquote);
+		input++;
+	}
+	return (check_quote_errors(in_squote, in_dquote));
 }

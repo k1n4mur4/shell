@@ -30,8 +30,6 @@ char	**create_envp_array(void);
 int		wait_for_child_process(pid_t pid);
 
 /* Helper functions */
-void	free_argv_array(char **argv);
-void	free_envp_array(char **envp);
 int		count_word_list(t_word_list *list);
 
 #endif

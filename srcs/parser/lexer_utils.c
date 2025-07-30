@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexer.c                                            :+:      :+:    :+:   */
+/*   lexer_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -13,24 +13,43 @@
 #include "error.h"
 #include "parser.h"
 
-t_word_list	*lexer_tokenize(const char *input)
+int	is_whitespace(char c)
 {
-	t_word_list *word_list;
-	const char *current;
+	return (c == ' ' || c == '\t' || c == '\n');
+}
 
-	if (!input)
+int	is_operator_char(char c)
+{
+	return (c == '|' || c == '<' || c == '>' || c == '&');
+}
+
+void	lexer_skip_whitespace(const char **input)
+{
+	while (**input && is_whitespace(**input))
+		(*input)++;
+}
+
+int	is_word_char(char c)
+{
+	return (!is_whitespace(c) && !is_operator_char(c));
+}
+
+char	*append_string(char *base, char *append)
+{
+	char	*new_str;
+	size_t	base_len;
+	size_t	append_len;
+	size_t	new_len;
+
+	if (!base || !append)
 		return (NULL);
-	if (!validate_input(input))
+	base_len = ft_strlen(base);
+	append_len = ft_strlen(append);
+	new_len = base_len + append_len + 1;
+	new_str = ft_calloc(new_len, sizeof(char));
+	if (!new_str)
 		return (NULL);
-	word_list = NULL;
-	current = input;
-	while (*current)
-	{
-		word_list = process_single_token(&current, word_list);
-		if (!word_list && *current)
-			return (NULL);
-		if (!*current)
-			break ;
-	}
-	return (word_list);
+	ft_strlcpy(new_str, base, new_len);
+	ft_strlcat(new_str, append, new_len);
+	return (new_str);
 }
