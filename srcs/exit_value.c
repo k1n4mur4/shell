@@ -14,9 +14,8 @@
 
 int	exit_value(int exit_value, enum e_type type)
 {
-	static int	last_command_exit_value;
+	static int	last_command_exit_value = 0;
 
-	last_command_exit_value = 0;
 	if (type == SET)
 	{
 		/* Ensure exit value is in valid range (0-255) for bash compatibility */
@@ -31,11 +30,9 @@ int	exit_value(int exit_value, enum e_type type)
 
 int	shell_exit_status(int exit_code, enum e_type type)
 {
-	static int	exit_code_value;
-	static int	should_exit;
+	static int	exit_code_value = 0;
+	static int	should_exit = 0;
 
-	exit_code_value = 0;
-	should_exit = 0;
 	if (type == SET)
 	{
 		exit_code_value = exit_code & 255;

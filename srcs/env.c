@@ -205,9 +205,8 @@ void	show_env_list(t_env *env_list)
 
 t_env	*env(t_env *env_list, enum e_type type)
 {
-	static t_env	*env;
+	static t_env	*env = NULL;
 
-	env = NULL;
 	if (type == GET)
 		return (env);
 	if (type == SET)

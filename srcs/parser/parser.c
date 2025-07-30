@@ -18,6 +18,7 @@ static t_command	*parse_pipeline(t_word_list **tokens);
 static t_command	*parse_and_or(t_word_list **tokens);
 static t_command	*parse_simple_command(t_word_list **tokens);
 static int			is_redirect_operator(const char *token);
+static void			append_redirect(t_redirect **head, t_redirect *new_redirect);
 
 /* Debug function to print word list */
 void	print_word_list(t_word_list *list)
@@ -258,8 +259,8 @@ static t_command	*parse_simple_command(t_word_list **tokens)
 			new_redirect = make_redirect(type, (*tokens)->word->word);
 			if (new_redirect)
 			{
-				new_redirect->next = redirects;
-				redirects = new_redirect;
+				new_redirect->next = NULL;
+				append_redirect(&redirects, new_redirect);
 			}
 			*tokens = (*tokens)->next;
 		}
@@ -343,4 +344,22 @@ void	parser(t_command *command)
 		/* ft_dprintf(STDOUT_FILENO, "Failed to create AST\n"); */
 	}
 	dispose_words(word_list);
+}
+
+/* Helper function to append redirect to end of list */
+static void	append_redirect(t_redirect **head, t_redirect *new_redirect)
+{
+	t_redirect	*current;
+
+	if (!head || !new_redirect)
+		return ;
+	if (!*head)
+	{
+		*head = new_redirect;
+		return ;
+	}
+	current = *head;
+	while (current->next)
+		current = current->next;
+	current->next = new_redirect;
 }

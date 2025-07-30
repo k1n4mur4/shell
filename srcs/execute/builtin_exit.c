@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:47:57 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 02:12:37 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 02:19:25 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,5 +60,6 @@ int	builtin_exit(t_word_list *args)
 		}
 	}
 	shell_exit_status(exit_code, SET);
+	exit(exit_code);
 	return (exit_code);
 }

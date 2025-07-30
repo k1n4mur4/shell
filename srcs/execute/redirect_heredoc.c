@@ -89,9 +89,15 @@ static char	*read_heredoc_content(const char *delimiter)
 	size_t				delim_len;
 	struct sigaction	old_sa;
 	struct sigaction	new_sa;
+	int					original_stdout;
 
 	content = NULL;
 	delim_len = ft_strlen(delimiter);
+	/* Save original stdout to ensure prompts go to terminal */
+	original_stdout = dup(STDOUT_FILENO);
+	if (original_stdout == -1)
+		return (NULL);
+	
 	/* Set up heredoc signal handler */
 	sigemptyset(&new_sa.sa_mask);
 	new_sa.sa_flags = 0;
@@ -99,7 +105,12 @@ static char	*read_heredoc_content(const char *delimiter)
 	sigaction(SIGINT, &new_sa, &old_sa);
 	while (1)
 	{
+		/* Temporarily restore stdout for prompt display */
+		if (isatty(original_stdout))
+			dup2(original_stdout, STDOUT_FILENO);
+		
 		line = readline("> ");
+		
 		if (!line)
 		{
 			/* Ctrl+D or signal interruption */
@@ -118,6 +129,7 @@ static char	*read_heredoc_content(const char *delimiter)
 	}
 	/* Restore original signal handler */
 	sigaction(SIGINT, &old_sa, NULL);
+	close(original_stdout);
 	return (content);
 }
 

@@ -18,7 +18,7 @@
 # include "ft_printf.h"
 # include <stdarg.h>
 
-# define ERROR_SYNTAX "unexpected EOF while looking for matching `%c'\n"
+# define ERROR_SYNTAX "syntax error: unexpected EOF while looking for matching `%c'\n"
 # define ERROR_PARSE "parse error near `%s'\n"
 
 void	parser_error(char *iname, const char *format, ...);

@@ -20,9 +20,28 @@ void	init_redirect_backup(t_redirect_backup *backup)
 	backup->stderr_backup = -1;
 }
 
-int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
+/* Find the last redirection of specified types */
+static t_redirect	*find_last_redirect(t_redirect *redirects, int types)
 {
 	t_redirect	*current;
+	t_redirect	*last_found;
+
+	current = redirects;
+	last_found = NULL;
+	while (current)
+	{
+		if ((types & (1 << current->type)) != 0)
+			last_found = current;
+		current = current->next;
+	}
+	return (last_found);
+}
+
+int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
+{
+	t_redirect	*last_input;
+	t_redirect	*last_output;
+	t_redirect	*last_heredoc;
 
 	if (!backup)
 		return (-1);
@@ -42,31 +61,40 @@ int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
 		init_redirect_backup(backup);
 		return (-1);
 	}
-	current = redirects;
-	while (current)
+
+	/* Find the last redirection of each type */
+	last_input = find_last_redirect(redirects, (1 << R_INPUT));
+	last_output = find_last_redirect(redirects, (1 << R_OUTPUT) | (1 << R_APPEND));
+	last_heredoc = find_last_redirect(redirects, (1 << R_HEREDOC));
+
+	/* Apply heredoc first (it can affect input) */
+	if (last_heredoc)
 	{
-		if (current->type == R_INPUT)
-		{
-			if (handle_input_redirect(current->filename) == -1)
-				return (-1);
-		}
-		else if (current->type == R_OUTPUT)
-		{
-			if (handle_output_redirect(current->filename) == -1)
-				return (-1);
-		}
-		else if (current->type == R_APPEND)
-		{
-			if (handle_append_redirect(current->filename) == -1)
-				return (-1);
-		}
-		else if (current->type == R_HEREDOC)
-		{
-			if (handle_heredoc_redirect(current->filename) == -1)
-				return (-1);
-		}
-		current = current->next;
+		if (handle_heredoc_redirect(last_heredoc->filename) == -1)
+			return (-1);
 	}
+	/* Apply input redirection */
+	else if (last_input)
+	{
+		if (handle_input_redirect(last_input->filename) == -1)
+			return (-1);
+	}
+
+	/* Apply output redirection */
+	if (last_output)
+	{
+		if (last_output->type == R_OUTPUT)
+		{
+			if (handle_output_redirect(last_output->filename) == -1)
+				return (-1);
+		}
+		else if (last_output->type == R_APPEND)
+		{
+			if (handle_append_redirect(last_output->filename) == -1)
+				return (-1);
+		}
+	}
+
 	return (0);
 }
 
