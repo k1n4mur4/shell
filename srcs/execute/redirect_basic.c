@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:17 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:46:04 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:57:11 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,18 +76,16 @@ int	handle_output_redirect(const char *filename)
 
 int	handle_append_redirect(const char *filename)
 {
-	int fd;
-	struct stat file_stat;
+	int			fd;
+	struct stat	file_stat;
 
 	if (!filename)
 		return (-1);
-
 	if (stat(filename, &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
 	{
 		print_redirect_error(filename, "Is a directory");
 		return (-1);
 	}
-
 	fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd == -1)
 	{

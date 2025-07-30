@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:12 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:45:39 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 21:08:55 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,10 @@ int	wait_for_child_process(pid_t pid)
 int	execute_external_command(const char *command_path, const char *command_name,
 		t_word_list *args)
 {
-	pid_t pid;
-	char **argv;
-	char **envp;
-	int exit_code;
+	pid_t	pid;
+	char	**argv;
+	char	**envp;
+	int		exit_code;
 
 	if (!command_path)
 		return (127);
@@ -62,7 +62,7 @@ int	execute_external_command(const char *command_path, const char *command_name,
 	if (pid == -1)
 	{
 		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n",
-				strerror(errno));
+			strerror(errno));
 		free_string_array(argv);
 		free_string_array(envp);
 		return (1);
@@ -73,7 +73,7 @@ int	execute_external_command(const char *command_path, const char *command_name,
 		if (execve(command_path, argv, envp) == -1)
 		{
 			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_name,
-					strerror(errno));
+				strerror(errno));
 			free_string_array(argv);
 			free_string_array(envp);
 			if (errno == EACCES)

@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:29 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:35:52 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 21:05:02 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,8 @@ static void	expand_word_list(t_word_list *words)
 	current = words;
 	while (current)
 	{
-		if (current->word && current->word->word &&
-			should_expand_in_context(current->word->word))
+		if (current->word && current->word->word
+			&& should_expand_in_context(current->word->word))
 		{
 			expanded = expand_word(current->word->word);
 			if (expanded)
@@ -100,7 +100,6 @@ void	expand_ast(t_command *ast)
 {
 	if (!ast)
 		return ;
-
 	if (ast->type == CM_SIMPLE && ast->simple)
 	{
 		if (ast->simple->words)

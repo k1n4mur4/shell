@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:47 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:39:24 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:50:01 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	print_word_list(t_word_list *list)
 	while (current)
 	{
 		ft_dprintf(STDOUT_FILENO, "Word[%d]: '%s' (flags: 0x%x)\n", index++,
-				current->word->word, current->word->flags);
+			current->word->word, current->word->flags);
 		current = current->next;
 	}
 }
@@ -32,8 +32,8 @@ int	is_redirect_operator(const char *token)
 {
 	if (!token)
 		return (0);
-	if (ft_strcmp(token, "<") == 0 || ft_strcmp(token, ">") == 0 ||
-		ft_strcmp(token, ">>") == 0 || ft_strcmp(token, "<<") == 0)
+	if (ft_strcmp(token, "<") == 0 || ft_strcmp(token, ">") == 0
+		|| ft_strcmp(token, ">>") == 0 || ft_strcmp(token, "<<") == 0)
 		return (1);
 	return (0);
 }

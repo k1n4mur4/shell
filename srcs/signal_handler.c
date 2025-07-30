@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:49:42 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:33:02 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 21:15:45 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ void	signal_handler(int signum)
 	}
 }
 
-/* シグナルハンドラーを設定 */
 void	set_signal(void)
 {
 	struct sigaction	sa;
@@ -35,18 +34,17 @@ void	set_signal(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = signal_handler;
-	/* SIGINTハンドラーを設定（Ctrl+C） */
 	if (sigaction(SIGINT, &sa, NULL) == -1)
 	{
 		ft_dprintf(STDERR_FILENO,
-					ERROR_PREFIX "failed to set SIGINT handler\n");
+			ERROR_PREFIX "failed to set SIGINT handler\n");
 		return ;
 	}
 	sa.sa_handler = SIG_IGN;
 	if (sigaction(SIGQUIT, &sa, NULL) == -1)
 	{
 		ft_dprintf(STDERR_FILENO,
-					ERROR_PREFIX "failed to set SIGQUIT handler\n");
+			ERROR_PREFIX "failed to set SIGQUIT handler\n");
 		return ;
 	}
 }
@@ -69,7 +67,7 @@ void	setup_child_signals(void)
 
 void	setup_parent_signals(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;

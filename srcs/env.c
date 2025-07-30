@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:54 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 02:07:07 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:58:01 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ void	add_env_list(t_env *env, t_env *env_list)
 			add_env_value(add_lst, lst);
 	}
 }
-
 
 t_env	*env(t_env *env_list, enum e_type type)
 {

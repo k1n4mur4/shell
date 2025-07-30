@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:47:57 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:39:53 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 21:12:02 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ static int	is_valid_number(const char *str)
 int	builtin_exit(t_word_list *args)
 {
 	int			exit_code;
-	long long	temp_code;
 
 	exit_code = 0;
 	ft_fputs("exit\n", STDOUT_FILENO);
@@ -50,14 +49,13 @@ int	builtin_exit(t_word_list *args)
 		}
 		if (!is_valid_number(args->word->word))
 		{
-			ft_dprintf(STDERR_FILENO, "minishell: exit: %s: numeric argument required\n", args->word->word);
+			ft_dprintf(STDERR_FILENO,
+				"minishell: exit: %s: numeric argument required\n",
+				args->word->word);
 			exit_code = 2;
 		}
 		else
-		{
-			temp_code = ft_atoi(args->word->word);
-			exit_code = (int)(temp_code & 255);
-		}
+			exit_code = (int)((ft_atol(args->word->word)) & 255);
 	}
 	shell_exit_status(exit_code, SET);
 	exit(exit_code);

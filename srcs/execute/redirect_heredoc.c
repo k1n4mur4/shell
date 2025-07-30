@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 00:04:41 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:46:59 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 21:08:32 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,8 +96,6 @@ static char	*read_heredoc_content(const char *delimiter)
 	original_stdout = dup(STDOUT_FILENO);
 	if (original_stdout == -1)
 		return (NULL);
-	
-	/* Set up heredoc signal handler */
 	sigemptyset(&new_sa.sa_mask);
 	new_sa.sa_flags = 0;
 	new_sa.sa_handler = heredoc_signal_handler;

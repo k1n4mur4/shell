@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:40 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:37:41 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:51:15 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ t_redirect	*alloc_redirect(void)
 
 void	dispose_redirects(t_redirect *redirects)
 {
-	t_redirect *next;
+	t_redirect	*next;
 
 	while (redirects)
 	{

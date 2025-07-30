@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:49:39 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:33:45 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 21:12:59 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,8 +168,7 @@ int	shell(int argc, char **argv, char **envp)
 	{
 		ft_dprintf(STDERR_FILENO,
 					"%s: %s: No such file or directory\n",
-					ENAME,
-					argv[1]);
+					ENAME, argv[1]);
 		return (127);
 	}
 	initialize_enviroment(envp);

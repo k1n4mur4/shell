@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:44 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:38:02 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:48:40 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,14 @@ int	setup_file_redirect(const char *filename, int target_fd, int flags)
 	file_fd = open(filename, flags, 0644);
 	if (file_fd == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: %s: %s\n", filename, strerror(errno));
+		ft_dprintf(STDERR_FILENO,
+			"minishell: %s: %s\n", filename, strerror(errno));
 		return (-1);
 	}
 	if (dup2(file_fd, target_fd) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: dup2 failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO,
+			"minishell: dup2 failed: %s\n", strerror(errno));
 		close(file_fd);
 		return (-1);
 	}
@@ -43,7 +45,8 @@ int	backup_fd(int fd)
 
 	backup_fd = dup(fd);
 	if (backup_fd == -1)
-		ft_dprintf(STDERR_FILENO, "minishell: backup fd failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO,
+			"minishell: backup fd failed: %s\n", strerror(errno));
 	return (backup_fd);
 }
 
@@ -53,7 +56,8 @@ int	restore_fd(int fd, int backup_fd)
 		return (-1);
 	if (dup2(backup_fd, fd) == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: restore fd failed: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO,
+			"minishell: restore fd failed: %s\n", strerror(errno));
 		return (-1);
 	}
 	close(backup_fd);

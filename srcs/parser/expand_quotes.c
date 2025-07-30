@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:32 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:33 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:53:33 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,11 +200,11 @@ char	*expand_unquoted(const char *word)
 
 char	*expand_mixed_quotes(const char *word)
 {
-	char *result;
-	char *temp;
-	char *part;
-	int i;
-	int start;
+	char	*result;
+	char	*temp;
+	char	*part;
+	int		i;
+	int		start;
 
 	result = ft_strdup("");
 	if (!result)

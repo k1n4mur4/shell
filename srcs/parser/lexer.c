@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:38 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:37:03 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:52:27 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 t_word_list	*lexer_tokenize(const char *input)
 {
-	t_word_list *word_list;
-	const char *current;
+	t_word_list	*word_list;
+	const char	*current;
 
 	if (!input)
 		return (NULL);

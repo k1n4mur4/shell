@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:26 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:35:37 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:55:06 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,10 @@ void	dispose_words(t_word_list *list)
 
 t_word_list	*copy_word_list(t_word_list *list)
 {
-	t_word_list *new_list;
-	t_word_list *current;
-	t_word_list *new_node;
-	t_word_desc *new_word;
+	t_word_list	*new_list;
+	t_word_list	*current;
+	t_word_list	*new_node;
+	t_word_desc	*new_word;
 
 	new_list = NULL;
 	current = list;

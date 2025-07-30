@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:35 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:48:36 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:52:51 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ char	*get_special_var(char c)
 
 char	*extract_var_name(const char *str, int *advance)
 {
-	int i;
-	char *var_name;
+	int		i;
+	char	*var_name;
 
 	if (!str || str[0] != '$')
 		return (NULL);

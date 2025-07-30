@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:38 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:37:03 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:52:08 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,8 @@ char	*extract_word(const char **input)
 	int			len;
 
 	start = *input;
-	while (**input && !is_whitespace(**input) &&
-			!is_operator_char(**input) && **input != '\'' && **input != '"')
+	while (**input && !is_whitespace(**input)
+		&& !is_operator_char(**input) && **input != '\'' && **input != '"')
 		(*input)++;
 	len = *input - start;
 	result = ft_calloc(len + 1, sizeof(char));
