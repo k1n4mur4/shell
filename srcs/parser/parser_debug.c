@@ -6,61 +6,68 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:47 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 20:50:13 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 03:51:59 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "error.h"
 #include "parser.h"
+#include "parser_debug_helpers.h"
+
+static void	_helper_print_words(t_word_list *words)
+{
+	while (words)
+	{
+		ft_dprintf(STDOUT_FILENO, " %s", words->word->word);
+		words = words->next;
+	}
+}
+
+static void	_helper_print_redirect(t_redirect *redir)
+{
+	if (redir->type == R_INPUT)
+		ft_dprintf(STDOUT_FILENO, " <%s", redir->filename);
+	else if (redir->type == R_OUTPUT)
+		ft_dprintf(STDOUT_FILENO, " >%s", redir->filename);
+	else if (redir->type == R_APPEND)
+		ft_dprintf(STDOUT_FILENO, " >>%s", redir->filename);
+	else if (redir->type == R_HEREDOC)
+		ft_dprintf(STDOUT_FILENO, " <<%s", redir->filename);
+}
+
+static void	_helper_print_redirects(t_redirect *redirects)
+{
+	t_redirect	*redir;
+
+	ft_dprintf(STDOUT_FILENO, " [redirects:");
+	redir = redirects;
+	while (redir)
+	{
+		_helper_print_redirect(redir);
+		redir = redir->next;
+	}
+	ft_dprintf(STDOUT_FILENO, "]");
+}
+
+static void	_helper_print_simple_cmd(t_simple_command *simple)
+{
+	ft_dprintf(STDOUT_FILENO, "SIMPLE_CMD:");
+	if (simple && simple->words)
+		_helper_print_words(simple->words);
+	else
+		ft_dprintf(STDOUT_FILENO, " (empty)");
+	if (simple && simple->redirects)
+		_helper_print_redirects(simple->redirects);
+	ft_dprintf(STDOUT_FILENO, "\n");
+}
 
 void	print_ast(t_command *cmd, int depth)
 {
-	int			i;
-	t_redirect	*redir;
-	t_word_list	*words;
-
 	if (!cmd)
 		return ;
-	i = 0;
-	while (i < depth)
-	{
-		ft_dprintf(STDOUT_FILENO, "  ");
-		i++;
-	}
+	helper_print_indent(depth);
 	if (cmd->type == CM_SIMPLE)
-	{
-		ft_dprintf(STDOUT_FILENO, "SIMPLE_CMD:");
-		if (cmd->simple && cmd->simple->words)
-		{
-			words = cmd->simple->words;
-			while (words)
-			{
-				ft_dprintf(STDOUT_FILENO, " %s", words->word->word);
-				words = words->next;
-			}
-		}
-		else
-			ft_dprintf(STDOUT_FILENO, " (empty)");
-		if (cmd->simple && cmd->simple->redirects)
-		{
-			ft_dprintf(STDOUT_FILENO, " [redirects:");
-			redir = cmd->simple->redirects;
-			while (redir)
-			{
-				if (redir->type == R_INPUT)
-					ft_dprintf(STDOUT_FILENO, " <%s", redir->filename);
-				else if (redir->type == R_OUTPUT)
-					ft_dprintf(STDOUT_FILENO, " >%s", redir->filename);
-				else if (redir->type == R_APPEND)
-					ft_dprintf(STDOUT_FILENO, " >>%s", redir->filename);
-				else if (redir->type == R_HEREDOC)
-					ft_dprintf(STDOUT_FILENO, " <<%s", redir->filename);
-				redir = redir->next;
-			}
-			ft_dprintf(STDOUT_FILENO, "]");
-		}
-		ft_dprintf(STDOUT_FILENO, "\n");
-	}
+		_helper_print_simple_cmd(cmd->simple);
 	else if (cmd->type == CM_PIPE)
 	{
 		ft_dprintf(STDOUT_FILENO, "PIPE:\n");

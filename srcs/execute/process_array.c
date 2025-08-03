@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:12 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:45:39 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 03:00:00 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "process_utils.h"
 #include "signal_handler.h"
 #include "memory_utils.h"
+#include "process_array_helpers.h"
 
 int	count_word_list(t_word_list *list)
 {
@@ -31,38 +32,19 @@ int	count_word_list(t_word_list *list)
 char	**create_argv_array(const char *command_path, const char *command_name,
 		t_word_list *args)
 {
-	char		**argv;
-	int			argc;
-	int			i;
-	t_word_list	*current;
+	char	**argv;
+	int		argc;
 
 	if (!command_path)
 		return (NULL);
 	argc = 1 + count_word_list(args);
-	argv = ft_calloc(argc + 1, sizeof(char *));
+	argv = allocate_argv(argc, command_name);
 	if (!argv)
 		return (NULL);
-	argv[0] = ft_strdup(command_name);
-	if (!argv[0])
+	if (!copy_args(argv, args, argc))
 	{
-		free(argv);
+		free_string_array(argv);
 		return (NULL);
-	}
-	i = 1;
-	current = args;
-	while (current && i < argc)
-	{
-		if (current->word && current->word->word)
-		{
-			argv[i] = ft_strdup(current->word->word);
-			if (!argv[i])
-			{
-				free_string_array(argv);
-				return (NULL);
-			}
-		}
-		current = current->next;
-		i++;
 	}
 	argv[argc] = NULL;
 	return (argv);
@@ -71,58 +53,11 @@ char	**create_argv_array(const char *command_path, const char *command_name,
 char	**create_envp_array(void)
 {
 	t_env	*env_list;
-	char	**envp;
-	char	*env_str;
-	char	*temp;
 	int		count;
-	int		i;
-	t_env	*temp_env;
 
 	env_list = env(NULL, GET);
 	if (!env_list)
 		return (NULL);
-	count = 0;
-	temp_env = env_list;
-	while (temp_env)
-	{
-		if (temp_env->key)
-			count++;
-		temp_env = temp_env->next;
-	}
-	envp = ft_calloc(count + 1, sizeof(char *));
-	if (!envp)
-		return (NULL);
-	i = 0;
-	while (env_list && i < count)
-	{
-		if (env_list->key)
-		{
-			if (env_list->value)
-			{
-				temp = ft_strjoin(env_list->key, "=");
-				if (!temp)
-				{
-					free_string_array(envp);
-					return (NULL);
-				}
-				env_str = ft_strjoin(temp, env_list->value);
-				free(temp);
-			}
-			else
-			{
-				env_str = ft_strjoin(env_list->key, "=");
-			}
-			if (!env_str)
-			{
-				free_string_array(envp);
-				return (NULL);
-			}
-			envp[i] = env_str;
-			i++;
-		}
-		env_list = env_list->next;
-	}
-	envp[i] = NULL;
-	return (envp);
+	count = count_env_vars(env_list);
+	return (fill_envp_array(env_list, count));
 }
-

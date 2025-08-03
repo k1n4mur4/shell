@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:44 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:38:02 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 03:28:31 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ char				*sb_finalize(t_string_builder *sb);
 /* String operations */
 int					sb_append(t_string_builder *sb, const char *str);
 int					sb_append_char(t_string_builder *sb, char c);
-int					sb_join(t_string_builder *sb, const char *str1, const char *str2);
+int					sb_join(t_string_builder *sb, const char *str1,
+						const char *str2);
 
 #endif

@@ -6,26 +6,12 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:07 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:43:48 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 03:00:00 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "path_utils.h"
-
-int	is_executable(const char *path)
-{
-	struct stat	st;
-
-	if (!path)
-		return (0);
-	if (stat(path, &st) != 0)
-		return (0);
-	if (!S_ISREG(st.st_mode))
-		return (0);
-	if (access(path, X_OK) != 0)
-		return (0);
-	return (1);
-}
+#include "path_validation.h"
 
 char	**get_path_dirs(void)
 {
@@ -47,36 +33,39 @@ char	**get_path_dirs(void)
 	return (NULL);
 }
 
-char	*find_command_path(const char *command)
+static char	*_helper_check_absolute_path(const char *command)
 {
-	char **path_dirs;
-	char *full_path;
-	char *temp;
-	int i;
-
-	if (!command)
-		return (NULL);
-
 	if (ft_strchr(command, '/'))
 	{
 		if (is_executable(command))
 			return (ft_strdup(command));
 		return (NULL);
 	}
-	path_dirs = get_path_dirs();
-	if (!path_dirs)
+	return ((char *)-1);
+}
+
+static char	*_helper_build_full_path(const char *dir, const char *command)
+{
+	char	*temp;
+	char	*full_path;
+
+	temp = ft_strjoin(dir, "/");
+	if (!temp)
 		return (NULL);
+	full_path = ft_strjoin(temp, command);
+	free(temp);
+	return (full_path);
+}
+
+static char	*_helper_search_in_path_dirs(char **path_dirs, const char *command)
+{
+	char	*full_path;
+	int		i;
+
 	i = 0;
 	while (path_dirs[i])
 	{
-		temp = ft_strjoin(path_dirs[i], "/");
-		if (!temp)
-		{
-			ft_free_array2((void **)path_dirs);
-			return (NULL);
-		}
-		full_path = ft_strjoin(temp, command);
-		free(temp);
+		full_path = _helper_build_full_path(path_dirs[i], command);
 		if (!full_path)
 		{
 			ft_free_array2((void **)path_dirs);
@@ -92,4 +81,20 @@ char	*find_command_path(const char *command)
 	}
 	ft_free_array2((void **)path_dirs);
 	return (NULL);
+}
+
+char	*find_command_path(const char *command)
+{
+	char	**path_dirs;
+	char	*result;
+
+	if (!command)
+		return (NULL);
+	result = _helper_check_absolute_path(command);
+	if (result != (char *)-1)
+		return (result);
+	path_dirs = get_path_dirs();
+	if (!path_dirs)
+		return (NULL);
+	return (_helper_search_in_path_dirs(path_dirs, command));
 }

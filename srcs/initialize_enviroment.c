@@ -6,24 +6,12 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:49:30 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 19:34:03 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 04:06:46 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "env.h"
-
-t_env	*alloc_env(void)
-{
-	t_env	*temp;
-
-	temp = (t_env *)ft_calloc(1, sizeof(t_env));
-	if (!temp)
-		return (NULL);
-	temp->key = NULL;
-	temp->value = NULL;
-	temp->next = NULL;
-	return (temp);
-}
+#include "initialize_env_helpers.h"
 
 t_env	*make_env_list(char *key, char *value)
 {
@@ -39,22 +27,35 @@ t_env	*make_env_list(char *key, char *value)
 	return (temp);
 }
 
-t_env	*initialize_env(char *envp)
+static char	*extract_env_key(char *envp, int *key_len)
 {
-	int		i;
-	t_env	*new;
-	char	*key;
-	char	*value;
+	int	i;
 
 	i = 0;
 	while (envp[i] != '=' && envp[i] != '\0')
 		i++;
 	if (envp[i] == '\0')
 		return (NULL);
-	key = ft_strndup(envp, i);
+	*key_len = i;
+	return (ft_strndup(envp, i));
+}
+
+static char	*extract_env_value(char *envp, int key_len)
+{
+	return (ft_strdup(envp + key_len + 1));
+}
+
+t_env	*initialize_env(char *envp)
+{
+	t_env	*new;
+	char	*key;
+	char	*value;
+	int		key_len;
+
+	key = extract_env_key(envp, &key_len);
 	if (!key)
 		return (NULL);
-	value = ft_strdup(envp + i + 1);
+	value = extract_env_value(envp, key_len);
 	if (!value)
 	{
 		free(key);

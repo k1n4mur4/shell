@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:36:29 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:36:31 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 03:26:37 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,12 @@
 # include <signal.h>
 
 # define ENAME "minishell"
-
-# define PROMPT ENAME "$ "
-
-/* Error message prefixes */
-# define ERROR_PREFIX ENAME ": "
-# define ERROR_SYNTAX_PREFIX ENAME ": syntax error: "
-# define ERROR_COMMAND_PREFIX ENAME ": command not found: "
-# define ERROR_PERMISSION_PREFIX ENAME ": permission denied: "
-# define ERROR_NO_SUCH_FILE ENAME ": no such file or directory: "
+# define PROMPT "minishell$ "
+# define ERROR_PREFIX "minishell: "
+# define ERROR_SYNTAX_PREFIX "minishell: syntax error: "
+# define ERROR_COMMAND_PREFIX "minishell: command not found: "
+# define ERROR_PERMISSION_PREFIX "minishell: permission denied: "
+# define ERROR_NO_SUCH_FILE "minishell: no such file or directory: "
 
 typedef enum e_type
 {

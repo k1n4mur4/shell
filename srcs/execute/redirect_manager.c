@@ -11,46 +11,20 @@
 /* ************************************************************************** */
 
 #include "redirect_utils.h"
+#include "redirect_manager_helpers.h"
 #include <errno.h>
 
-void	init_redirect_backup(t_redirect_backup *backup)
+static int	_helper_backup_file_descriptors(t_redirect_backup *backup)
 {
-	backup->stdin_backup = -1;
-	backup->stdout_backup = -1;
-	backup->stderr_backup = -1;
-}
-
-static t_redirect	*find_last_redirect(t_redirect *redirects, int types)
-{
-	t_redirect	*current;
-	t_redirect	*last_found;
-
-	current = redirects;
-	last_found = NULL;
-	while (current)
-	{
-		if ((types & (1 << current->type)) != 0)
-			last_found = current;
-		current = current->next;
-	}
-	return (last_found);
-}
-
-int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
-{
-	t_redirect	*last_input;
-	t_redirect	*last_output;
-	t_redirect	*last_heredoc;
-
-	if (!backup)
-		return (-1);
 	backup->stdin_backup = dup(STDIN_FILENO);
 	backup->stdout_backup = dup(STDOUT_FILENO);
 	backup->stderr_backup = dup(STDERR_FILENO);
 	if (backup->stdin_backup == -1 || backup->stdout_backup == -1
 		|| backup->stderr_backup == -1)
 	{
-		ft_dprintf(STDERR_FILENO, "minishell: failed to backup file descriptors: %s\n", strerror(errno));
+		ft_dprintf(STDERR_FILENO,
+			"minishell: failed to backup file descriptors: %s\n",
+			strerror(errno));
 		if (backup->stdin_backup != -1)
 			close(backup->stdin_backup);
 		if (backup->stdout_backup != -1)
@@ -60,9 +34,12 @@ int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
 		init_redirect_backup(backup);
 		return (-1);
 	}
-	last_input = find_last_redirect(redirects, (1 << R_INPUT));
-	last_output = find_last_redirect(redirects, (1 << R_OUTPUT) | (1 << R_APPEND));
-	last_heredoc = find_last_redirect(redirects, (1 << R_HEREDOC));
+	return (0);
+}
+
+static int	_helper_handle_input_redirects(t_redirect *last_input,
+		t_redirect *last_heredoc)
+{
 	if (last_heredoc)
 	{
 		if (handle_heredoc_redirect(last_heredoc->filename) == -1)
@@ -73,19 +50,44 @@ int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
 		if (handle_input_redirect(last_input->filename) == -1)
 			return (-1);
 	}
-	if (last_output)
+	return (0);
+}
+
+static int	_helper_handle_output_redirects(t_redirect *last_output)
+{
+	if (!last_output)
+		return (0);
+	if (last_output->type == R_OUTPUT)
 	{
-		if (last_output->type == R_OUTPUT)
-		{
-			if (handle_output_redirect(last_output->filename) == -1)
-				return (-1);
-		}
-		else if (last_output->type == R_APPEND)
-		{
-			if (handle_append_redirect(last_output->filename) == -1)
-				return (-1);
-		}
+		if (handle_output_redirect(last_output->filename) == -1)
+			return (-1);
 	}
+	else if (last_output->type == R_APPEND)
+	{
+		if (handle_append_redirect(last_output->filename) == -1)
+			return (-1);
+	}
+	return (0);
+}
+
+int	setup_redirections(t_redirect *redirects, t_redirect_backup *backup)
+{
+	t_redirect	*last_input;
+	t_redirect	*last_output;
+	t_redirect	*last_heredoc;
+
+	if (!backup)
+		return (-1);
+	if (_helper_backup_file_descriptors(backup) == -1)
+		return (-1);
+	last_input = find_last_redirect(redirects, (1 << R_INPUT));
+	last_output = find_last_redirect(redirects,
+			(1 << R_OUTPUT) | (1 << R_APPEND));
+	last_heredoc = find_last_redirect(redirects, (1 << R_HEREDOC));
+	if (_helper_handle_input_redirects(last_input, last_heredoc) == -1)
+		return (-1);
+	if (_helper_handle_output_redirects(last_output) == -1)
+		return (-1);
 	return (0);
 }
 

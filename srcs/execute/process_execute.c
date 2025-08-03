@@ -14,82 +14,77 @@
 #include "process_utils.h"
 #include "signal_handler.h"
 #include "memory_utils.h"
+#include "process_execute_helpers.h"
 
-int	wait_for_child_process(pid_t pid)
+static int	_helper_prepare_arrays(char **argv, char ***envp)
 {
-	int	status;
-	int	exit_code;
-
-	if (waitpid(pid, &status, 0) == -1)
+	if (!argv)
+		return (1);
+	*envp = create_envp_array();
+	if (!*envp)
 	{
-		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "waitpid failed: %s\n",
-				strerror(errno));
+		free_string_array(argv);
 		return (1);
 	}
-	if (WIFEXITED(status))
-	{
-		exit_code = WEXITSTATUS(status);
-		return (exit_code);
-	}
-	else if (WIFSIGNALED(status))
-	{
-		exit_code = 128 + WTERMSIG(status);
-		return (exit_code);
-	}
+	return (0);
+}
+
+static int	_helper_handle_fork_error(char **argv, char **envp)
+{
+	ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n",
+		strerror(errno));
+	free_string_array(argv);
+	free_string_array(envp);
 	return (1);
 }
 
-int	execute_external_command(const char *command_path, const char *command_name,
-		t_word_list *args)
+static void	_helper_child_process(const char *command_path,
+		const char *command_name, char **argv, char **envp)
+{
+	setup_child_signals();
+	if (execve(command_path, argv, envp) == -1)
+	{
+		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_name,
+			strerror(errno));
+		free_string_array(argv);
+		free_string_array(envp);
+		if (errno == EACCES)
+			exit(126);
+		else
+			exit(127);
+	}
+}
+
+static int	_helper_parent_process(pid_t pid, char **argv, char **envp)
+{
+	int	exit_code;
+
+	setup_parent_signals();
+	exit_code = wait_for_child_process(pid);
+	set_signal();
+	free_string_array(argv);
+	free_string_array(envp);
+	return (exit_code);
+}
+
+int	execute_external_command(const char *command_path,
+		const char *command_name, t_word_list *args)
 {
 	pid_t	pid;
 	char	**argv;
 	char	**envp;
-	int		exit_code;
 
 	if (!command_path)
 		return (127);
-	argv = create_argv_array(command_path, command_name, args);
-	if (!argv)
+	argv = helper_create_argv(command_path, command_name, args);
+	if (_helper_prepare_arrays(argv, &envp) != 0)
 		return (1);
-	envp = create_envp_array();
-	if (!envp)
-	{
-		free_string_array(argv);
-		return (1);
-	}
 	pid = fork();
 	if (pid == -1)
-	{
-		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "fork failed: %s\n",
-			strerror(errno));
-		free_string_array(argv);
-		free_string_array(envp);
-		return (1);
-	}
+		return (_helper_handle_fork_error(argv, envp));
 	else if (pid == 0)
-	{
-		setup_child_signals();
-		if (execve(command_path, argv, envp) == -1)
-		{
-			ft_dprintf(STDERR_FILENO, ERROR_PREFIX "%s: %s\n", command_name,
-				strerror(errno));
-			free_string_array(argv);
-			free_string_array(envp);
-			if (errno == EACCES)
-				exit(126);
-			else
-				exit(127);
-		}
-	}
+		_helper_child_process(command_path, command_name, argv, envp);
 	else
-	{
-		setup_parent_signals();
-		exit_code = wait_for_child_process(pid);
-		set_signal();
-		free_string_array(argv);
-		free_string_array(envp);
-		return (exit_code);
-	}
+		return (_helper_parent_process(pid, argv, envp));
 	return (1);
 }

@@ -6,18 +6,13 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:48:35 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 20:52:51 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 04:06:57 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "env.h"
 #include "eval.h"
 #include "parser.h"
-
-static int	is_valid_var_char(char c)
-{
-	return (ft_isalnum(c) || c == '_');
-}
 
 char	*get_env_value(const char *var_name)
 {
@@ -47,23 +42,24 @@ char	*get_special_var(char c)
 	return (ft_strdup(""));
 }
 
-char	*extract_var_name(const char *str, int *advance)
+static char	*handle_special_vars(const char *str, int *advance)
+{
+	char	*var_name;
+
+	*advance = 2;
+	var_name = ft_calloc(2, sizeof(char));
+	if (var_name)
+		var_name[0] = str[1];
+	return (var_name);
+}
+
+static char	*parse_variable_name(const char *str, int *advance)
 {
 	int		i;
 	char	*var_name;
 
-	if (!str || str[0] != '$')
-		return (NULL);
-	if (str[1] == '?' || str[1] == '$')
-	{
-		*advance = 2;
-		var_name = ft_calloc(2, sizeof(char));
-		if (var_name)
-			var_name[0] = str[1];
-		return (var_name);
-	}
 	i = 1;
-	while (str[i] && is_valid_var_char(str[i]))
+	while (str[i] && (ft_isalnum(str[i]) || str[i] == '_'))
 		i++;
 	if (i == 1)
 	{
@@ -77,4 +73,13 @@ char	*extract_var_name(const char *str, int *advance)
 	if (i > 1)
 		ft_strlcpy(var_name, &str[1], i);
 	return (var_name);
+}
+
+char	*extract_var_name(const char *str, int *advance)
+{
+	if (!str || str[0] != '$')
+		return (NULL);
+	if (str[1] == '?' || str[1] == '$')
+		return (handle_special_vars(str, advance));
+	return (parse_variable_name(str, advance));
 }

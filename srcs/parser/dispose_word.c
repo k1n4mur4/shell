@@ -34,33 +34,51 @@ void	dispose_words(t_word_list *list)
 	}
 }
 
+static t_word_desc	*create_word_copy(t_word_desc *source)
+{
+	t_word_desc	*new_word;
+
+	new_word = make_word(source->word);
+	if (!new_word)
+		return (NULL);
+	new_word->flags = source->flags;
+	return (new_word);
+}
+
+static int	add_word_to_list(t_word_list **new_list, t_word_desc *new_word)
+{
+	t_word_list	*new_node;
+
+	new_node = make_word_list(new_word, *new_list);
+	if (!new_node)
+		return (0);
+	if (!*new_list)
+		*new_list = new_node;
+	return (1);
+}
+
 t_word_list	*copy_word_list(t_word_list *list)
 {
 	t_word_list	*new_list;
 	t_word_list	*current;
-	t_word_list	*new_node;
 	t_word_desc	*new_word;
 
 	new_list = NULL;
 	current = list;
 	while (current)
 	{
-		new_word = make_word(current->word->word);
+		new_word = create_word_copy(current->word);
 		if (!new_word)
 		{
 			dispose_words(new_list);
 			return (NULL);
 		}
-		new_word->flags = current->word->flags;
-		new_node = make_word_list(new_word, new_list);
-		if (!new_node)
+		if (!add_word_to_list(&new_list, new_word))
 		{
 			dispose_word(new_word);
 			dispose_words(new_list);
 			return (NULL);
 		}
-		if (!new_list)
-			new_list = new_node;
 		current = current->next;
 	}
 	return (new_list);

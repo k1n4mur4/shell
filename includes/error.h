@@ -6,7 +6,7 @@
 /*   By: kinamura <kinamura@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 01:36:39 by kinamura          #+#    #+#             */
-/*   Updated: 2025/07/30 01:36:41 by kinamura         ###   ########.fr       */
+/*   Updated: 2025/08/04 03:24:01 by kinamura         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@
 # include "ft_printf.h"
 # include <stdarg.h>
 
-# define ERROR_SYNTAX "syntax error: unexpected EOF while looking for matching `%c'\n"
+# define ERROR_SYNTAX "syntax error: unexpected EOF while looking \
+	for matching `%c'\n"
 # define ERROR_PARSE "parse error near `%s'\n"
 
 void	parser_error(char *iname, const char *format, ...);
