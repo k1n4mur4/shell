@@ -37,8 +37,6 @@ char	*get_special_var(char c)
 {
 	if (c == '?')
 		return (ft_itoa(exit_value(0, GET)));
-	else if (c == '$')
-		return (ft_itoa(getpid()));
 	return (ft_strdup(""));
 }
 
@@ -79,7 +77,7 @@ char	*extract_var_name(const char *str, int *advance)
 {
 	if (!str || str[0] != '$')
 		return (NULL);
-	if (str[1] == '?' || str[1] == '$')
+	if (str[1] == '?')
 		return (handle_special_vars(str, advance));
 	return (parse_variable_name(str, advance));
 }

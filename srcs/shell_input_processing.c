@@ -15,6 +15,7 @@
 #include "minishell.h"
 #include "redirect_utils.h"
 #include "shell_helpers.h"
+#include "shell_input_helpers.h"
 #include "signal_handler.h"
 #include <unistd.h>
 
@@ -44,36 +45,22 @@ int	execute_command_string(const char *command_str)
 	return (last_exit_code);
 }
 
-static char	*_helper_append_input_line(char *full_input, char *line)
-{
-	char	*temp;
-
-	if (full_input)
-	{
-		temp = ft_strjoin(full_input, line);
-		free(full_input);
-		return (temp);
-	}
-	else
-		return (ft_strdup(line));
-}
-
 char	*read_all_input(void)
 {
 	char	*line;
 	char	*full_input;
-	size_t	len;
 
-	line = NULL;
 	full_input = NULL;
-	len = 0;
-	while (getline(&line, &len, stdin) != -1)
+	line = read_line_with_read();
+	while (line != NULL)
 	{
 		if (line && *line)
-			full_input = _helper_append_input_line(full_input, line);
-	}
-	if (line)
+			full_input = helper_append_input_line(full_input, line);
 		free(line);
+		if (!line || !*line)
+			break ;
+		line = read_line_with_read();
+	}
 	return (full_input);
 }
 
