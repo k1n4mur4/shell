@@ -28,18 +28,18 @@ void	free_string_array(char **array)
 	free(array);
 }
 
-void	free_linked_list(void *head, void (*free_node)(void *))
+void	free_env_linked_list(t_env *head)
 {
-	void	*current;
-	void	*next;
+	t_env	*current;
+	t_env	*next;
 
-	if (!head || !free_node)
+	if (!head)
 		return ;
 	current = head;
 	while (current)
 	{
-		next = *(void **)current;
-		free_node(current);
+		next = current->next;
+		free_env_node(current);
 		current = next;
 	}
 }
@@ -60,5 +60,5 @@ void	free_env_node(void *node)
 
 void	cleanup_env_list(void *env_list)
 {
-	free_linked_list(env_list, free_env_node);
+	free_env_linked_list((t_env *)env_list);
 }
