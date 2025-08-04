@@ -17,9 +17,13 @@ char	*get_variable_value(char *var_name)
 {
 	char	*value;
 
+	if (ft_strcmp(var_name, "?") == 0)
+		return (get_special_var('?'));
+	else if (ft_strcmp(var_name, "$") == 0)
+		return (get_special_var('$'));
 	value = get_env_value(var_name);
 	if (!value)
-		value = "";
+		return (ft_strdup(""));
 	return (value);
 }
 
@@ -30,14 +34,24 @@ char	*append_variable(char *result, const char *word, int *i)
 	char	*temp;
 	int		advance;
 
-	var_name = extract_var_name(word + *i + 1, &advance);
+	var_name = extract_var_name(word + *i, &advance);
 	if (!var_name)
+	{
+		(*i)++;
 		return (result);
+	}
 	var_value = get_variable_value(var_name);
+	if (!var_value)
+	{
+		free(var_name);
+		(*i)++;
+		return (result);
+	}
 	temp = ft_strjoin(result, var_value);
 	free(result);
 	free(var_name);
-	*i += advance + 1;
+	free(var_value);
+	*i += advance;
 	return (temp);
 }
 

@@ -16,17 +16,6 @@
 #include <signal.h>
 #include <string.h>
 
-static int	_helper_create_pipe(int pipe_fd[2])
-{
-	if (pipe(pipe_fd) == -1)
-	{
-		ft_dprintf(STDERR_FILENO, ERROR_PREFIX "pipe failed: %s\n",
-			strerror(errno));
-		return (-1);
-	}
-	return (0);
-}
-
 static void	_helper_left_child_process(t_command *left, int pipe_fd[2])
 {
 	setup_child_signals();

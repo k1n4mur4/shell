@@ -50,6 +50,7 @@ void		append_redirect(t_redirect **head, t_redirect *new_redirect);
 
 void		expand_ast(t_command *ast);
 char		*expand_word(const char *word);
+char		*expand_word_with_flags(const char *word, int flags);
 int			should_expand_in_context(const char *word);
 char		*expand_single_quoted(const char *word);
 char		*expand_double_quoted(const char *word);

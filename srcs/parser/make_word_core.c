@@ -38,13 +38,29 @@ t_word_desc	*make_bare_word(const char *string)
 	return (temp);
 }
 
-t_word_desc	*make_word_flags(t_word_desc *w, const char *string)
+static void	analyze_word_chars(t_word_desc *w, const char *string)
 {
-	int		i;
+	size_t	i;
 	size_t	slen;
 
 	i = 0;
 	slen = ft_strlen(string);
+	while (i < slen)
+	{
+		if (string[i] == '$')
+			w->flags |= W_HASDOLLAR;
+		if (string[i] == '\'')
+			w->flags |= W_QUOTED | W_SINGLEQUOTED;
+		else if (string[i] == '"')
+			w->flags |= W_QUOTED | W_DOUBLEQUOTED;
+		else if (string[i] == '`')
+			w->flags |= W_QUOTED;
+		i++;
+	}
+}
+
+t_word_desc	*make_word_flags(t_word_desc *w, const char *string)
+{
 	if (ft_strcmp(string, "||") == 0)
 		w->flags |= W_OR;
 	else if (ft_strcmp(string, "&&") == 0)
@@ -52,15 +68,6 @@ t_word_desc	*make_word_flags(t_word_desc *w, const char *string)
 	else if (ft_strcmp(string, "|") == 0)
 		w->flags |= W_PIPE;
 	else
-	{
-		while (i < slen)
-		{
-			if (string[i] == '$')
-				w->flags |= W_HASDOLLAR;
-			if (string[i] == '\'' || string[i] == '`' || string[i] == '"')
-				w->flags |= W_QUOTED;
-			i++;
-		}
-	}
+		analyze_word_chars(w, string);
 	return (w);
 }

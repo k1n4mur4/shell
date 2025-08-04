@@ -12,44 +12,22 @@
 
 #include "env.h"
 #include "eval.h"
+#include "make_cmd.h"
 #include "parser.h"
 
-char	*expand_word(const char *word)
+static char	*process_word_expansion(t_word_desc *word)
 {
-	int	has_single;
-	int	has_double;
+	char	*expanded;
 
-	if (!word)
-		return (NULL);
-	if (ft_strchr(word, '\'') != NULL)
-		has_single = 1;
+	if (word->flags & W_SINGLEQUOTED)
+		expanded = ft_strdup(word->word);
+	else if (word->flags & W_QUOTED)
+		expanded = expand_word_with_flags(word->word, word->flags);
+	else if (should_expand_in_context(word->word))
+		expanded = expand_word(word->word);
 	else
-		has_single = 0;
-	if (ft_strchr(word, '"') != NULL)
-		has_double = 1;
-	else
-		has_double = 0;
-	if (has_single && has_double)
-		return (expand_mixed_quotes(word));
-	else if (has_single)
-		return (expand_single_quoted(word));
-	else if (has_double)
-		return (expand_double_quoted(word));
-	else
-		return (expand_unquoted(word));
-}
-
-int	should_expand_in_context(const char *word)
-{
-	if (!word)
-		return (0);
-	if (ft_strchr(word, '\'') != NULL)
-		return (1);
-	if (ft_strchr(word, '"') != NULL)
-		return (1);
-	if (ft_strchr(word, '$') != NULL)
-		return (1);
-	return (0);
+		expanded = NULL;
+	return (expanded);
 }
 
 static void	expand_word_list(t_word_list *words)
@@ -60,10 +38,9 @@ static void	expand_word_list(t_word_list *words)
 	current = words;
 	while (current)
 	{
-		if (current->word && current->word->word
-			&& should_expand_in_context(current->word->word))
+		if (current->word && current->word->word)
 		{
-			expanded = expand_word(current->word->word);
+			expanded = process_word_expansion(current->word);
 			if (expanded)
 			{
 				free(current->word->word);

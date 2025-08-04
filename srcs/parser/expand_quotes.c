@@ -44,16 +44,25 @@ char	*expand_double_quoted(const char *word)
 {
 	char	*result;
 	int		i;
+	int		prev_i;
 
+	if (!word)
+		return (NULL);
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
 	i = 0;
 	while (word[i])
 	{
+		prev_i = i;
 		result = process_double_quoted_char(result, word, &i);
 		if (!result)
 			return (NULL);
+		if (i == prev_i)
+		{
+			free(result);
+			return (NULL);
+		}
 	}
 	return (result);
 }
@@ -62,16 +71,25 @@ char	*expand_unquoted(const char *word)
 {
 	char	*result;
 	int		i;
+	int		prev_i;
 
+	if (!word)
+		return (NULL);
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
 	i = 0;
 	while (word[i])
 	{
+		prev_i = i;
 		result = process_unquoted_char(result, word, &i);
 		if (!result)
 			return (NULL);
+		if (i == prev_i)
+		{
+			free(result);
+			return (NULL);
+		}
 	}
 	return (result);
 }

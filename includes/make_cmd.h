@@ -26,6 +26,8 @@
 # define W_NOGLOB 0x0020     /* No glob expansion */
 # define W_AND 0x0040        /* Word is && */
 # define W_OR 0x0080         /* Word is || */
+# define W_SINGLEQUOTED 0x0100 /* Word is single quoted */
+# define W_DOUBLEQUOTED 0x0200 /* Word is double quoted */
 
 /* Word creation functions */
 t_word_desc			*alloc_word_desc(void);

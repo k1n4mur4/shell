@@ -19,14 +19,14 @@ char	*extract_quoted_string(const char **input, char quote)
 	int			len;
 	char		*result;
 
-	start = *input;
 	(*input)++;
+	start = *input;
 	while (**input && **input != quote)
 		(*input)++;
 	if (**input != quote)
 		return (NULL);
-	(*input)++;
 	len = *input - start;
+	(*input)++;
 	result = ft_calloc(len + 1, sizeof(char));
 	if (!result)
 		return (NULL);

@@ -52,44 +52,27 @@ t_command	*parse_and_or(t_word_list **tokens)
 	return (left);
 }
 
-static t_command	*process_pipeline_element(t_command *left,
-		t_word_list **tokens)
+static int	process_word(t_word_list **tokens, t_word_list **words,
+		t_redirect **redirects)
 {
-	t_command	*right;
+	t_word_desc	*word_copy;
 
+	word_copy = copy_word_desc((*tokens)->word);
+	if (!word_copy)
+	{
+		dispose_words(*words);
+		dispose_redirects(*redirects);
+		return (0);
+	}
+	*words = make_word_list(word_copy, *words);
+	if (!*words)
+	{
+		dispose_word(word_copy);
+		dispose_redirects(*redirects);
+		return (0);
+	}
 	*tokens = (*tokens)->next;
-	if (!*tokens)
-	{
-		parser_error(NULL, ERROR_PARSE, "\\n");
-		dispose_ast_command(left);
-		return (NULL);
-	}
-	right = parse_simple_command(tokens);
-	if (!right)
-	{
-		dispose_ast_command(left);
-		return (NULL);
-	}
-	left = make_binary_command(CM_PIPE, left, right);
-	if (!left)
-		dispose_ast_command(right);
-	return (left);
-}
-
-t_command	*parse_pipeline(t_word_list **tokens)
-{
-	t_command	*left;
-
-	left = parse_simple_command(tokens);
-	if (!left)
-		return (NULL);
-	while (*tokens && ((*tokens)->word->flags & W_PIPE))
-	{
-		left = process_pipeline_element(left, tokens);
-		if (!left)
-			return (NULL);
-	}
-	return (left);
+	return (1);
 }
 
 t_command	*parse_simple_command(t_word_list **tokens)

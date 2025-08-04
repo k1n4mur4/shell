@@ -33,22 +33,40 @@ char	*process_single_quote(const char *word, int *i)
 	return (ft_strdup(""));
 }
 
+static char	*process_dq_content(const char *word, int *i, char *result)
+{
+	int	prev_i;
+
+	while (word[*i] && word[*i] != '"')
+	{
+		prev_i = *i;
+		result = process_double_quoted_char(result, word, i);
+		if (!result)
+			return (NULL);
+		if (*i == prev_i)
+		{
+			free(result);
+			return (NULL);
+		}
+	}
+	return (result);
+}
+
 char	*process_double_quote(const char *word, int *i)
 {
 	char	*result;
 	int		start;
 
+	if (!word || !i)
+		return (NULL);
 	start = *i + 1;
 	*i = start;
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
-	while (word[*i] && word[*i] != '"')
-	{
-		result = process_double_quoted_char(result, word, i);
-		if (!result)
-			return (NULL);
-	}
+	result = process_dq_content(word, i, result);
+	if (!result)
+		return (NULL);
 	if (word[*i] == '"')
 		(*i)++;
 	return (result);
@@ -57,15 +75,24 @@ char	*process_double_quote(const char *word, int *i)
 char	*process_unquoted(const char *word, int *i)
 {
 	char	*result;
+	int		prev_i;
 
+	if (!word || !i)
+		return (NULL);
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
 	while (word[*i] && word[*i] != '\'' && word[*i] != '"')
 	{
+		prev_i = *i;
 		result = process_unquoted_char(result, word, i);
 		if (!result)
 			return (NULL);
+		if (*i == prev_i)
+		{
+			free(result);
+			return (NULL);
+		}
 	}
 	return (result);
 }
@@ -80,27 +107,4 @@ char	*append_to_result(char *result, char *temp)
 	free(result);
 	free(temp);
 	return (new_result);
-}
-
-int	process_word(t_word_list **tokens, t_word_list **words,
-		t_redirect **redirects)
-{
-	t_word_desc	*word_copy;
-
-	word_copy = copy_word_desc((*tokens)->word);
-	if (!word_copy)
-	{
-		dispose_words(*words);
-		dispose_redirects(*redirects);
-		return (0);
-	}
-	*words = make_word_list(word_copy, *words);
-	if (!*words)
-	{
-		dispose_word(word_copy);
-		dispose_redirects(*redirects);
-		return (0);
-	}
-	*tokens = (*tokens)->next;
-	return (1);
 }
